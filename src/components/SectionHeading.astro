@@ -1,0 +1,5 @@
+---
+const { label, title, body } = Astro.props as {label:string;title:string;body?:string};
+---
+<div class="section-heading"><p class="eyebrow">{label}</p><h2>{title}</h2>{body && <p class="prose">{body}</p>}</div>
+<style>.section-heading{display:grid;gap:.8rem}.section-heading h2{font-size:clamp(2rem,4vw,3.7rem);max-width:14ch}.section-heading .prose{margin:0}</style>

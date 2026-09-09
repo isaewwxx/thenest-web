@@ -1,0 +1,1 @@
+These are AI-generated development illustrations, not photographs of The Nest. Replace them with owner-approved original photographs before launch. The site labels them visibly and does not use them as factual property evidence.

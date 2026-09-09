@@ -1,0 +1,7 @@
+---
+import type { Locale, Unit } from '../data/types'; import type { Translation } from '../i18n/bg'; import { bookingTarget } from '../lib/content'; import { site } from '../data/site';
+const {locale,copy,units}=Astro.props as {locale:Locale;copy:Translation;units:readonly Unit[]};
+---
+{units.length ? <div class="units">{units.map((unit)=><article class="unit"><div class="unit-copy">{unit.name && <h3>{unit.name[locale]}</h3>}{unit.description && <p>{unit.description[locale]}</p>}<dl>{unit.capacity !== null && <div><dt>{copy.ui.guests}</dt><dd>{unit.capacity}</dd></div>}{unit.bedrooms !== null && <div><dt>{copy.ui.bedrooms}</dt><dd>{unit.bedrooms}</dd></div>}{unit.beds && <div><dt>{copy.ui.beds}</dt><dd>{unit.beds[locale]}</dd></div>}</dl></div><a class="btn btn-outline" href={unit.bookingUrl || bookingTarget(site.contacts,locale)}>{copy.ui.enquire}</a></article>)}</div> : <div class="empty-state"><p>{copy.accommodation.pending}</p></div>}
+<style>.units{display:grid;gap:1rem}.unit{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center;padding:1.5rem 0;border-top:1px solid var(--line)}.unit h3{font-size:1.7rem}.unit p{max-width:50ch;color:var(--muted)}.unit dl{display:flex;gap:1.3rem;margin:1rem 0 0}.unit dt{color:var(--muted);font-size:.8rem}.unit dd{margin:0;font-weight:650}.empty-state{border:1px solid var(--line);padding:1.5rem;color:var(--muted)}@media(max-width:600px){.unit{grid-template-columns:1fr}.unit .btn{justify-self:start}}
+</style>

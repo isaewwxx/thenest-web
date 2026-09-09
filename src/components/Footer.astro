@@ -1,0 +1,7 @@
+---
+import type { Locale } from '../data/types'; import { pathFor } from '../lib/routes'; import type { Translation } from '../i18n/bg';
+const { locale,copy }=Astro.props as {locale:Locale;copy:Translation};
+---
+<footer class="footer"><div class="container footer-grid"><div><a class="footer-wordmark" href={pathFor('home',locale)}>Гнездото</a><p>{copy.footer.line}</p><p class="muted">{copy.footer.region}</p></div><nav aria-label={locale === 'bg' ? 'Долен колонтитул' : 'Footer'}><a href={pathFor('accommodation',locale)}>{copy.nav.accommodation}</a><a href={pathFor('gallery',locale)}>{copy.nav.gallery}</a><a href={pathFor('location',locale)}>{copy.nav.location}</a><a href={pathFor('contact',locale)}>{copy.nav.contact}</a></nav><div class="footer-end"><p>© {new Date().getFullYear()} {locale === 'bg' ? 'Гнездото' : 'The Nest'}</p><p>{copy.footer.copyright}</p></div></div></footer>
+<style>.footer{padding:5rem 0 2rem;border-top:1px solid var(--line);background:var(--paper-deep);color:var(--ink)}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:2rem}.footer-wordmark{font:500 1.6rem Lora,Georgia,serif;text-decoration:none;color:var(--forest)}.footer p{margin:.6rem 0;color:var(--muted)}.footer nav{display:flex;flex-direction:column;gap:.45rem}.footer nav a{color:var(--muted);text-decoration:none}.footer nav a:hover{color:var(--ink)}.footer-end{font-size:.85rem;text-align:right}@media(max-width:700px){.footer-grid{grid-template-columns:1fr 1fr}.footer-end{text-align:left;grid-column:1/-1;border-top:1px solid var(--line);padding-top:1rem}}
+</style>

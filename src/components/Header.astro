@@ -1,0 +1,33 @@
+---
+import type { Locale } from '../data/types';
+import { pathFor, type PageKey } from '../lib/routes';
+import type { Translation } from '../i18n/bg';
+const { locale, page, copy } = Astro.props as { locale: Locale; page: PageKey; copy: Translation };
+const other = locale === 'bg' ? 'en' : 'bg';
+const labels = [ ['accommodation', copy.nav.accommodation], ['gallery', copy.nav.gallery], ['location', copy.nav.location], ['contact', copy.nav.contact] ] as const;
+---
+<a class="skip-link" href="#main">{copy.ui.skip}</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="wordmark" href={pathFor('home', locale)} aria-label={locale === 'bg' ? 'Гнездото' : 'The Nest'}><span>Гнездото</span><small>The Nest</small></a>
+    <details class="mobile-nav">
+      <summary aria-label={copy.ui.menu} aria-expanded="false">{copy.ui.menu}</summary>
+      <nav aria-label={locale === 'bg' ? 'Мобилна навигация' : 'Mobile navigation'}>
+        <a href={pathFor('home', locale)}>{copy.nav.home}</a>
+        {labels.map(([key,label]) => <a href={pathFor(key, locale)}>{label}</a>)}
+        <a href={pathFor(page, other)} lang={other}>{other === 'en' ? 'English' : 'Български'}</a>
+      </nav>
+    </details>
+    <nav class="desktop-nav" aria-label={locale === 'bg' ? 'Основна навигация' : 'Main navigation'}>
+      {labels.map(([key,label]) => <a class:list-active={page === key} href={pathFor(key, locale)}>{label}</a>)}
+      <a class="language" href={pathFor(page, other)} lang={other}>{other === 'en' ? 'English' : 'Български'}</a>
+    </nav>
+  </div>
+</header>
+<script is:inline>
+  document.querySelectorAll('.mobile-nav').forEach((details)=>details.addEventListener('toggle',()=>details.querySelector('summary')?.setAttribute('aria-expanded',String(details.open))));
+  document.querySelectorAll('.mobile-nav').forEach((details)=>details.addEventListener('keydown',(event)=>{if(event.key==='Escape'&&details.open){details.open=false;details.querySelector('summary')?.focus();}}));
+</script>
+<style>
+.site-header{position:relative;z-index:10;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 93%,transparent)}.header-inner{display:flex;align-items:center;justify-content:space-between;min-height:5.5rem}.wordmark{display:flex;flex-direction:column;text-decoration:none;color:var(--forest);line-height:1}.wordmark span{font:500 1.35rem/1.1 Lora,Georgia,serif}.wordmark small{margin-top:.3rem;color:var(--muted);font-size:.65rem;letter-spacing:.17em;text-transform:uppercase}.desktop-nav{display:flex;align-items:center;gap:1.65rem;font-size:.95rem}.desktop-nav a{text-decoration:none;color:var(--muted)}.desktop-nav a:hover,.desktop-nav .list-active{color:var(--ink)}.desktop-nav .list-active{font-weight:650}.desktop-nav .language{border-left:1px solid var(--line);padding-left:1.4rem;color:var(--forest);font-weight:700;font-size:.78rem;letter-spacing:.1em}.mobile-nav{display:none}.skip-link{position:absolute;left:1rem;top:-4rem;background:var(--forest);color:var(--paper);padding:.5rem 1rem;z-index:20}.skip-link:focus{top:1rem}@media(max-width:700px){.desktop-nav{display:none}.mobile-nav{display:block;position:relative}.mobile-nav summary{list-style:none;display:flex;align-items:center;gap:.6rem;cursor:pointer;color:var(--forest);font-weight:650}.mobile-nav summary::-webkit-details-marker{display:none}.mobile-nav summary::after{content:'+';font-size:1.4rem;line-height:1;transition:transform .2s}.mobile-nav[open] summary::after{transform:rotate(45deg)}.mobile-nav nav{position:absolute;right:0;top:2.5rem;width:min(18rem,calc(100vw - 2.5rem));display:flex;flex-direction:column;gap:.2rem;padding:1rem;background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow)}.mobile-nav nav a{padding:.6rem;text-decoration:none}.mobile-nav nav a:hover{background:var(--paper-deep)}}
+</style>

@@ -1,0 +1,40 @@
+{
+  "name": "the-nest-lozenets",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev --host 127.0.0.1",
+    "build": "astro build && node scripts/build-headers.mjs",
+    "preview": "astro preview --host 127.0.0.1",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:release": "node --experimental-strip-types scripts/check-release.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@fontsource-variable/lora": "^5.3.0",
+    "@fontsource-variable/source-sans-3": "^5.3.0",
+    "@lucide/astro": "^1.42.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.2",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "lighthouse": "^13.4.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^1.0.0",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.0"
+  }
+}

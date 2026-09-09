@@ -1,0 +1,26 @@
+@import '@fontsource-variable/lora';
+@import '@fontsource-variable/source-sans-3';
+@import 'tailwindcss';
+
+:root { --paper:#f5f2e9; --paper-deep:#e9e5d9; --ink:#25352c; --muted:#566258; --forest:#254d3a; --moss:#4d6339; --wood:#9a6745; --sea:#668a8b; --line:#d2d2c4; --shadow:0 18px 45px rgba(37,53,44,.13); color-scheme:light; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; background:var(--paper); }
+body { margin:0; background:var(--paper); color:var(--ink); font-family:'Source Sans 3', sans-serif; font-size:1.05rem; line-height:1.6; }
+h1,h2,h3 { margin:0; font-family:'Lora', Georgia, serif; font-weight:500; letter-spacing:-.03em; line-height:1.08; }
+a { color:inherit; }
+:focus-visible { outline:3px solid var(--sea); outline-offset:4px; }
+.container { width:min(1180px,calc(100% - 2.5rem)); margin-inline:auto; }
+.eyebrow { color:var(--moss); font-size:.72rem; font-weight:700; letter-spacing:.18em; }
+.btn { display:inline-flex; align-items:center; gap:.55rem; min-height:3rem; padding:.72rem 1.2rem; border:1px solid transparent; border-radius:999px; font-weight:650; text-decoration:none; transition:transform .3s ease,background .3s ease,color .3s ease; }
+.btn:hover { transform:translateY(-2px); }
+.btn-primary { background:var(--forest); color:var(--paper); }
+.btn-primary:hover { background:#183a2b; }
+.btn-outline { border-color:var(--forest); color:var(--forest); }
+.btn-outline:hover { background:var(--forest); color:var(--paper); }
+.surface { background:var(--paper-deep); }
+.label { font-size:.72rem; font-weight:700; letter-spacing:.15em; color:var(--moss); }
+.prose { max-width:58ch; color:var(--muted); }
+.reveal { animation:reveal .75s both; }
+@keyframes reveal { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:none } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+@media (prefers-color-scheme:dark) { :root { --paper:#1c2822; --paper-deep:#24352d; --ink:#eff0e5; --muted:#c2cabb; --line:#425348; --forest:#b8d2b4; --moss:#c0ca93; --wood:#d09b6d; --sea:#a3c4c0; color-scheme:dark; } .btn-primary { background:var(--forest); color:#1e2a23; } .btn-outline { border-color:var(--forest); } }

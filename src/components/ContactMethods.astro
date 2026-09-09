@@ -1,0 +1,7 @@
+---
+import type { Contacts } from '../data/types'; import type { Translation } from '../i18n/bg'; import { contactLinks } from '../lib/content';
+const {copy,contacts}=Astro.props as {copy:Translation;contacts:Contacts}; const labels=copy.contact.channels; const links=contactLinks(contacts);
+---
+{links.length ? <div class="contact-methods">{links.map((link)=><a href={link.href} target={link.href.startsWith('http') ? '_blank' : undefined} rel={link.href.startsWith('http') ? 'noreferrer' : undefined}><span>{labels[link.kind as keyof typeof labels]}</span><small>{link.label}</small></a>)}</div> : <div class="empty-state"><p>{copy.contact.pending}</p></div>}
+<style>.contact-methods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.contact-methods a{display:flex;flex-direction:column;padding:1rem;border-bottom:1px solid var(--line);text-decoration:none}.contact-methods a:hover{background:var(--paper-deep)}.contact-methods span{font-weight:650}.contact-methods small{color:var(--muted);word-break:break-word}.empty-state{border:1px solid var(--line);padding:1.5rem;color:var(--muted)}@media(max-width:600px){.contact-methods{grid-template-columns:1fr}}
+</style>
