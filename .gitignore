@@ -8,3 +8,7 @@ coverage/
 test-results/
 playwright-report/
 .DS_Store
+.agents/
+.wrangler/
+research-images.zip
+src/assets.zip

@@ -1,7 +1,513 @@
 ---
-import type { Locale, Unit } from '../data/types'; import type { Translation } from '../i18n/bg'; import { bookingTarget } from '../lib/content'; import { site } from '../data/site';
-const {locale,copy,units}=Astro.props as {locale:Locale;copy:Translation;units:readonly Unit[]};
+import type { Locale, Unit } from '../data/types';
+import type { Translation } from '../i18n/bg';
+import { pathFor } from '../lib/routes';
+import { site } from '../data/site';
+import { Image } from 'astro:assets';
+import { gallery } from '../data/gallery';
+import roomFallback from '../assets/property/rooms/room-interior-wide.jpeg';
+import {
+  Users,
+  DoorOpen,
+  BedDouble,
+  ArrowUpRight,
+  Wind,
+  Tv,
+  Wifi,
+  Car,
+  TreePine,
+  CookingPot,
+  Refrigerator,
+  Bath,
+  Flame,
+  Flower2,
+  Dog,
+  Microwave,
+  Coffee,
+  UtensilsCrossed,
+  Table2,
+  Check,
+  Clock3,
+  CigaretteOff,
+} from '@lucide/astro';
+
+interface Props {
+  locale: Locale;
+  copy: Translation;
+  units: readonly Unit[];
+  showDetails?: boolean;
+}
+
+const { locale, copy, units, showDetails = true } = Astro.props;
+
+const amenityIcons = {
+  'air-conditioning': Wind,
+  'tv-cable': Tv,
+  wifi: Wifi,
+  parking: Car,
+  'private-veranda': TreePine,
+  kitchenette: CookingPot,
+  appliances: Refrigerator,
+  'private-bathroom': Bath,
+  'shared-kitchen': Flame,
+  garden: Flower2,
+  pets: Dog,
+  bbq: Flame,
+  'stove-oven': CookingPot,
+  microwave: Microwave,
+  'coffee-machine': Coffee,
+  'shared-fridge': Refrigerator,
+  'dining-tables': Table2,
+  cookware: UtensilsCrossed,
+} as const;
+
+function unitPhoto(unit: Unit) {
+  const preferredIds = ['room-interior-wide', ...(unit.gallery ?? [])];
+  for (const id of preferredIds) {
+    const match = gallery.find((photo) => photo.id === id);
+    if (match) return match.src;
+  }
+  return roomFallback;
+}
+
+function iconFor(id: string) {
+  return amenityIcons[id as keyof typeof amenityIcons] ?? Check;
+}
 ---
-{units.length ? <div class="units">{units.map((unit)=><article class="unit"><div class="unit-copy">{unit.name && <h3>{unit.name[locale]}</h3>}{unit.description && <p>{unit.description[locale]}</p>}<dl>{unit.capacity !== null && <div><dt>{copy.ui.guests}</dt><dd>{unit.capacity}</dd></div>}{unit.bedrooms !== null && <div><dt>{copy.ui.bedrooms}</dt><dd>{unit.bedrooms}</dd></div>}{unit.beds && <div><dt>{copy.ui.beds}</dt><dd>{unit.beds[locale]}</dd></div>}</dl></div><a class="btn btn-outline" href={unit.bookingUrl || bookingTarget(site.contacts,locale)}>{copy.ui.enquire}</a></article>)}</div> : <div class="empty-state"><p>{copy.accommodation.pending}</p></div>}
-<style>.units{display:grid;gap:1rem}.unit{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center;padding:1.5rem 0;border-top:1px solid var(--line)}.unit h3{font-size:1.7rem}.unit p{max-width:50ch;color:var(--muted)}.unit dl{display:flex;gap:1.3rem;margin:1rem 0 0}.unit dt{color:var(--muted);font-size:.8rem}.unit dd{margin:0;font-weight:650}.empty-state{border:1px solid var(--line);padding:1.5rem;color:var(--muted)}@media(max-width:600px){.unit{grid-template-columns:1fr}.unit .btn{justify-self:start}}
+
+{units.length ? (
+  <div class="units-container">
+    {units.map((unit) => {
+      const bookingUrl = `${pathFor('booking', locale)}?room=${encodeURIComponent(unit.id)}`;
+      const photo = unitPhoto(unit);
+      return (
+        <article class="unit-feature">
+          <div class="unit-media">
+            <Image
+              src={photo}
+              alt={copy.accommodation.roomPhotoAlt}
+              width={960}
+              height={720}
+              class="unit-image"
+              widths={[480, 720, 960]}
+              sizes="(max-width: 800px) 100vw, 48vw"
+            />
+          </div>
+
+          <div class="unit-copy">
+            <p class="unit-eyebrow">{copy.accommodation.unitBadge}</p>
+            {unit.name && <h3 class="unit-heading">{unit.name[locale]}</h3>}
+            {unit.description && (
+              <p class="unit-desc">{unit.description[locale]}</p>
+            )}
+
+            <ul class="unit-meta" role="list">
+              {unit.capacity !== null && (
+                <li>
+                  <Users size={16} stroke-width={2} aria-hidden="true" />
+                  <span>
+                    {copy.accommodation.capacityUpTo} {unit.capacity}{' '}
+                    {copy.accommodation.capacityGuests}
+                  </span>
+                </li>
+              )}
+              {unit.bedrooms !== null && (
+                <li>
+                  <DoorOpen size={16} stroke-width={2} aria-hidden="true" />
+                  <span>
+                    {unit.bedrooms}{' '}
+                    {unit.bedrooms === 1
+                      ? copy.accommodation.bedroomRoomSingular
+                      : copy.accommodation.bedroomRoomPlural}
+                  </span>
+                </li>
+              )}
+              {unit.beds && (
+                <li class="unit-meta-beds">
+                  <BedDouble size={16} stroke-width={2} aria-hidden="true" />
+                  <span>{unit.beds[locale]}</span>
+                </li>
+              )}
+            </ul>
+
+            <div class="unit-actions">
+              <a class="btn btn-primary unit-enquire-btn" href={bookingUrl}>
+                <span>{copy.ui.bookingCta}</span>
+                <ArrowUpRight size={16} stroke-width={2} aria-hidden="true" />
+              </a>
+            </div>
+          </div>
+
+          {showDetails && (
+            <div class="unit-details-drawer">
+              {unit.amenities?.length > 0 && (
+                <div class="unit-section necessities-section">
+                  <h4 class="section-sub">{copy.ui.amenities}</h4>
+                  <ul class="necessities-grid" role="list">
+                    {unit.amenities.map((amenity) => {
+                      const Icon = iconFor(amenity.id);
+                      return (
+                        <li class="necessity-item">
+                          <span class="necessity-icon" aria-hidden="true">
+                            <Icon size={18} stroke-width={2} />
+                          </span>
+                          <span class="necessity-label">
+                            {amenity.label[locale]}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              {site.sharedFacilities?.length > 0 && (
+                <div class="unit-section necessities-section shared-section">
+                  <h4 class="section-sub">
+                    {copy.accommodation.sharedAmenitiesHeading}
+                  </h4>
+                  <ul class="necessities-grid" role="list">
+                    {site.sharedFacilities.map((fac) => {
+                      const Icon = iconFor(fac.id);
+                      return (
+                        <li class="necessity-item">
+                          <span class="necessity-icon" aria-hidden="true">
+                            <Icon size={18} stroke-width={2} />
+                          </span>
+                          <span class="necessity-label">
+                            {fac.label[locale]}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
+              <div class="unit-section policies-section">
+                <h4 class="section-sub">{copy.accommodation.policies}</h4>
+                <dl class="policy-list">
+                  <div class="policy-item">
+                    <dt>
+                      <Clock3 size={16} stroke-width={2} aria-hidden="true" />
+                      <span>{copy.accommodation.policiesCheckInOut}</span>
+                    </dt>
+                    <dd>
+                      {site.policies.checkIn[locale]} /{' '}
+                      {site.policies.checkOut[locale]}
+                    </dd>
+                  </div>
+                  {site.policies.quietHours && (
+                    <div class="policy-item">
+                      <dt>
+                        <Clock3 size={16} stroke-width={2} aria-hidden="true" />
+                        <span>{copy.accommodation.policiesQuietHours}</span>
+                      </dt>
+                      <dd>{site.policies.quietHours[locale]}</dd>
+                    </div>
+                  )}
+                  <div class="policy-item">
+                    <dt>
+                      <Dog size={16} stroke-width={2} aria-hidden="true" />
+                      <span>{copy.accommodation.policiesPets}</span>
+                    </dt>
+                    <dd>{site.policies.pets[locale]}</dd>
+                  </div>
+                  {site.policies.smoking && (
+                    <div class="policy-item">
+                      <dt>
+                        <CigaretteOff
+                          size={16}
+                          stroke-width={2}
+                          aria-hidden="true"
+                        />
+                        <span>{copy.accommodation.policiesSmoking}</span>
+                      </dt>
+                      <dd>{site.policies.smoking[locale]}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            </div>
+          )}
+        </article>
+      );
+    })}
+  </div>
+) : (
+  <div class="empty-state">
+    <p>{copy.accommodation.pending}</p>
+  </div>
+)}
+
+<style>
+  .units-container {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .unit-feature {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.25rem);
+    align-items: center;
+  }
+
+  .unit-media {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius, 8px);
+    aspect-ratio: 5 / 4;
+    background: var(--paper-deep);
+    isolation: isolate;
+  }
+
+  .unit-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      160deg,
+      transparent 55%,
+      color-mix(in srgb, var(--forest) 12%, transparent) 100%
+    );
+    pointer-events: none;
+  }
+
+  .unit-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 45%;
+    display: block;
+    transition: transform var(--motion-slow) var(--ease-out);
+  }
+
+  .unit-feature:hover .unit-image {
+    transform: scale(1.03);
+  }
+
+  .unit-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .unit-eyebrow {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sea);
+  }
+
+  .unit-heading {
+    font-family: var(--font-heading);
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+    font-weight: 650;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.12;
+    max-width: 16ch;
+  }
+
+  .unit-desc {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.02rem;
+    line-height: 1.55;
+    max-width: 38ch;
+  }
+
+  .unit-meta {
+    list-style: none;
+    margin: 0.35rem 0 0;
+    padding: 1rem 0 0;
+    border-top: 1px solid var(--line);
+    display: grid;
+    gap: 0.7rem;
+    width: 100%;
+    max-width: 42ch;
+  }
+
+  .unit-meta li {
+    display: grid;
+    grid-template-columns: 1.1rem minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: start;
+    color: var(--ink);
+    font-size: 0.94rem;
+    line-height: 1.4;
+    font-weight: 550;
+  }
+
+  .unit-meta :global(svg) {
+    color: var(--sea);
+    margin-top: 0.12rem;
+  }
+
+  .unit-meta-beds {
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .unit-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+
+  .unit-enquire-btn {
+    min-height: 3rem;
+  }
+
+  .unit-details-drawer {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid var(--line);
+    padding-top: clamp(1.75rem, 3.5vw, 2.75rem);
+    margin-top: 0.5rem;
+  }
+
+  .unit-section {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .section-sub {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sea);
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .necessities-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.75rem;
+  }
+
+  .necessity-item {
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: center;
+    min-height: 3.1rem;
+    padding: 0.7rem 0.85rem;
+    background: color-mix(in srgb, var(--paper) 55%, white);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    border-radius: var(--radius, 8px);
+    transition:
+      border-color var(--motion-fast) var(--ease-out),
+      background-color var(--motion-fast) var(--ease-out);
+  }
+
+  .necessity-item:hover {
+    border-color: color-mix(in srgb, var(--forest) 28%, var(--line));
+    background: color-mix(in srgb, var(--paper) 35%, white);
+  }
+
+  .necessity-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: var(--radius-sm, 4px);
+    background: color-mix(in srgb, var(--sea) 12%, var(--paper));
+    color: var(--forest);
+  }
+
+  .necessity-label {
+    color: var(--ink);
+    font-size: 0.92rem;
+    line-height: 1.35;
+    font-weight: 550;
+  }
+
+  .shared-section .necessity-icon {
+    background: color-mix(in srgb, var(--wood) 12%, var(--paper));
+    color: var(--wood);
+  }
+
+  .policy-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem 1.35rem;
+    margin: 0;
+  }
+
+  .policy-item {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1rem 0 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .policy-item dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-weight: 650;
+    color: var(--forest);
+    font-size: 0.88rem;
+  }
+
+  .policy-item dt :global(svg) {
+    color: var(--sea);
+    flex-shrink: 0;
+  }
+
+  .policy-item dd {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .empty-state {
+    border-top: 1px solid var(--line);
+    padding: 1.5rem 0;
+    color: var(--muted);
+  }
+
+  @media (max-width: 800px) {
+    .unit-feature {
+      grid-template-columns: 1fr;
+      gap: 1.35rem;
+    }
+
+    .unit-media {
+      aspect-ratio: 16 / 11;
+    }
+
+    .unit-heading {
+      max-width: none;
+    }
+
+    .necessities-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .unit-image,
+    .necessity-item {
+      transition: none;
+    }
+
+    .unit-feature:hover .unit-image {
+      transform: none;
+    }
+  }
 </style>

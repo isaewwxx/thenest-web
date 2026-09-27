@@ -1,7 +1,297 @@
 ---
-import type { Locale } from '../data/types'; import { pathFor } from '../lib/routes'; import type { Translation } from '../i18n/bg';
-const { locale,copy }=Astro.props as {locale:Locale;copy:Translation};
+import type { Locale } from '../data/types';
+import { pathFor, type PageKey } from '../lib/routes';
+import type { Translation } from '../i18n/bg';
+import { site } from '../data/site';
+import { MapPin, Phone, ArrowUpRight } from '@lucide/astro';
+import NestMark from './NestMark.astro';
+
+interface Props {
+  locale: Locale;
+  page?: PageKey;
+  copy: Translation;
+}
+
+const { locale, page = 'home', copy } = Astro.props;
+const other = locale === 'bg' ? 'en' : 'bg';
+const brandName = copy.home.brand;
 ---
-<footer class="footer"><div class="container footer-grid"><div><a class="footer-wordmark" href={pathFor('home',locale)}>Гнездото</a><p>{copy.footer.line}</p><p class="muted">{copy.footer.region}</p></div><nav aria-label={locale === 'bg' ? 'Долен колонтитул' : 'Footer'}><a href={pathFor('accommodation',locale)}>{copy.nav.accommodation}</a><a href={pathFor('gallery',locale)}>{copy.nav.gallery}</a><a href={pathFor('location',locale)}>{copy.nav.location}</a><a href={pathFor('contact',locale)}>{copy.nav.contact}</a></nav><div class="footer-end"><p>© {new Date().getFullYear()} {locale === 'bg' ? 'Гнездото' : 'The Nest'}</p><p>{copy.footer.copyright}</p></div></div></footer>
-<style>.footer{padding:5rem 0 2rem;border-top:1px solid var(--line);background:var(--paper-deep);color:var(--ink)}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:2rem}.footer-wordmark{font:500 1.6rem Lora,Georgia,serif;text-decoration:none;color:var(--forest)}.footer p{margin:.6rem 0;color:var(--muted)}.footer nav{display:flex;flex-direction:column;gap:.45rem}.footer nav a{color:var(--muted);text-decoration:none}.footer nav a:hover{color:var(--ink)}.footer-end{font-size:.85rem;text-align:right}@media(max-width:700px){.footer-grid{grid-template-columns:1fr 1fr}.footer-end{text-align:left;grid-column:1/-1;border-top:1px solid var(--line);padding-top:1rem}}
+
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="footer-wordmark" href={pathFor('home', locale) || '/'}>
+        <NestMark size={48} class="footer-mark" />
+        <span class="footer-wordmark-text">
+          <span>{brandName}</span>
+          <small>{copy.footer.brandSubtitle}</small>
+        </span>
+      </a>
+      <p class="footer-tagline">{copy.footer.line}</p>
+      <p class="footer-address">
+        <MapPin
+          size={15}
+          stroke-width={2}
+          class="footer-icon"
+          aria-hidden="true"
+        />
+        {site.location.address[locale]}
+      </p>
+      <div class="footer-direct-contact">
+        <a href="tel:+359877116050" class="footer-tel">
+          <Phone
+            size={15}
+            stroke-width={2}
+            class="footer-icon"
+            aria-hidden="true"
+          />
+          +359 877 116 050
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-nav-col">
+      <h3 class="footer-heading">{copy.footer.navHeading}</h3>
+      <nav aria-label={copy.footer.navAria}>
+        <a href={pathFor('accommodation', locale)}>{copy.nav.accommodation}</a>
+        <a href={pathFor('gallery', locale)}>{copy.nav.gallery}</a>
+        <a href={pathFor('location', locale)}>{copy.nav.location}</a>
+        <a href={pathFor('booking', locale)}>{copy.ui.bookingCta}</a>
+        <a href={pathFor('contact', locale)}>{copy.nav.contact}</a>
+      </nav>
+    </div>
+
+    <div class="footer-platforms-col">
+      <h3 class="footer-heading">{copy.footer.platformsHeading}</h3>
+      <div class="footer-platform-links">
+        <a
+          href="https://www.booking.com/hotel/bg/bungala-gnezdoto-bungalows-the-nest.bg.html"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Booking.com
+          <ArrowUpRight size={14} stroke-width={2} aria-hidden="true" />
+        </a>
+        <a
+          href="https://www.airbnb.com/rooms/1518207915595474183"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Airbnb
+          <ArrowUpRight size={14} stroke-width={2} aria-hidden="true" />
+        </a>
+        <a
+          href="https://www.facebook.com/bungalagnezdoto/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Facebook
+          <ArrowUpRight size={14} stroke-width={2} aria-hidden="true" />
+        </a>
+        <a
+          href={
+            site.location.googleMapsUrl ??
+            'https://www.google.com/maps?q=42.20708,27.81049'
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Google Maps
+          <ArrowUpRight size={14} stroke-width={2} aria-hidden="true" />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <div class="footer-copy-text">
+      <p>
+        © {new Date().getFullYear()} {copy.footer.brandName},{' '}
+        {copy.footer.region}.
+      </p>
+      <p class="muted">{copy.footer.copyright}</p>
+    </div>
+    <div class="footer-alt-links">
+      <a href={pathFor(page, other)} lang={other} class="footer-lang-switch">
+        {copy.footer.langSwitchLabel}
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding: var(--section-y) 0 var(--section-y-sm);
+    border-top: 1px solid var(--line);
+    background: var(--paper-deep);
+    color: var(--ink);
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.2fr;
+    gap: var(--grid-gap);
+    margin-bottom: 3.5rem;
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .footer-wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+    color: var(--forest);
+    line-height: 1.1;
+  }
+
+  .footer-wordmark :global(.nest-mark) {
+    --nest-mark-size: 3rem;
+  }
+
+  .footer-wordmark-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+  }
+
+  .footer-wordmark-text span {
+    font-family: var(--font-heading);
+    font-weight: 650;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .footer-wordmark-text small {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .footer-tagline {
+    margin: 0.5rem 0 0;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+
+  .footer-address {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .footer-direct-contact {
+    margin-top: 0.5rem;
+  }
+
+  .footer-tel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--forest);
+    font-weight: 650;
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .footer-tel:hover {
+    text-decoration: underline;
+  }
+
+  .footer-heading {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--forest);
+    margin: 0 0 1.25rem;
+  }
+
+  .footer-nav-col nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .footer-nav-col nav a,
+  .footer-platform-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .footer-nav-col nav a:hover,
+  .footer-platform-links a:hover {
+    color: var(--ink);
+  }
+
+  .footer-platform-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+
+  .footer-copy-text p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .footer-lang-switch {
+    color: var(--forest);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .footer-lang-switch:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 800px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .footer-brand {
+      grid-column: span 2;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    .footer-brand {
+      grid-column: auto;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
 </style>

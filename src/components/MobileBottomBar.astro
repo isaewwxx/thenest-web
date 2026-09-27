@@ -1,0 +1,123 @@
+---
+import type { Locale } from '../data/types';
+import type { Translation } from '../i18n/bg';
+import { pathFor, type PageKey } from '../lib/routes';
+import { Phone, ArrowUpRight } from '@lucide/astro';
+
+interface Props {
+  locale: Locale;
+  page: PageKey;
+  copy: Translation;
+}
+
+const { locale, page, copy } = Astro.props;
+
+// Do not render the bottom bar on the dedicated booking page itself
+const isBookingPage = page === 'booking';
+---
+
+{!isBookingPage && (
+  <div
+    class="mobile-bottom-bar"
+    role="region"
+    aria-label={copy.ui.quickActions}
+  >
+    <div class="bar-inner">
+      <a
+        class="bar-btn bar-btn-call"
+        href="tel:+359877116050"
+        aria-label={copy.ui.callAria}
+      >
+        <Phone class="icon" size={16} stroke-width={2} aria-hidden="true" />
+        <span>{copy.ui.callUs}</span>
+      </a>
+      <a class="bar-btn bar-btn-booking" href={pathFor('booking', locale)}>
+        <span>{copy.ui.bookingCta}</span>
+        <ArrowUpRight
+          class="arrow"
+          size={16}
+          stroke-width={2}
+          aria-hidden="true"
+        />
+      </a>
+    </div>
+  </div>
+)}
+
+<style>
+  .mobile-bottom-bar {
+    display: none;
+  }
+
+  @media (max-width: 700px) {
+    .mobile-bottom-bar {
+      display: block;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--line);
+      padding: 0.6rem 1rem max(0.6rem, env(safe-area-inset-bottom, 0.6rem));
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .bar-inner {
+      display: grid;
+      grid-template-columns: 1fr 1.6fr;
+      gap: 0.65rem;
+      max-width: 450px;
+      margin: 0 auto;
+    }
+
+    .bar-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      min-height: 2.75rem;
+      padding: 0.5rem 0.85rem;
+      border-radius: var(--radius, 8px);
+      font-size: 0.9rem;
+      font-weight: 650;
+      text-decoration: none;
+      transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .bar-btn-call {
+      background: var(--paper-deep);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .bar-btn-booking {
+      background: var(--forest);
+      color: #f4f6f3;
+      border: 1px solid var(--forest-dark);
+      box-shadow: var(--shadow-card);
+    }
+
+    .bar-btn:active {
+      transform: scale(0.98);
+    }
+
+    .icon {
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .arrow {
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
+    }
+  }
+</style>

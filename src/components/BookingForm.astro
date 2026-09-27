@@ -1,0 +1,1413 @@
+---
+import type { Locale } from '../data/types';
+import type { Translation } from '../i18n/bg';
+import { pathFor } from '../lib/routes';
+import {
+  Calendar,
+  Users,
+  DoorOpen,
+  BedDouble,
+  Dog,
+  User,
+  Phone,
+  Mail,
+  MessageSquare,
+  CircleAlert,
+  LoaderCircle,
+  ArrowUpRight,
+  ArrowRight,
+  Check,
+  ShieldCheck,
+} from '@lucide/astro';
+
+interface Props {
+  locale: Locale;
+  copy: Translation;
+  initialUnitId?: string;
+}
+
+const { locale, copy, initialUnitId = 'bungalow-room' } = Astro.props;
+const b = copy.booking;
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+
+{turnstileSiteKey && (
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+    async
+    defer
+    is:inline
+  ></script>
+)}
+
+<div class="booking-panel" id="booking-container">
+  <div
+    class="booking-notice"
+    role="note"
+    id="booking-notice"
+    data-stay-title={b.disclaimerTitle}
+    data-stay-text={b.disclaimerText}
+    data-question-title={b.questionDisclaimerTitle}
+    data-question-text={b.questionDisclaimerText}
+  >
+    <ShieldCheck size={20} class="notice-icon" aria-hidden="true" />
+    <div>
+      <strong id="booking-notice-title">{b.disclaimerTitle}</strong>
+      <p id="booking-notice-text">{b.disclaimerText}</p>
+    </div>
+  </div>
+
+  <form
+    class="booking-form"
+    id="booking-form"
+    method="POST"
+    action="/api/booking"
+    data-validation={JSON.stringify({
+      ...b.validation,
+      submitting: b.fields.submitting,
+      submittingQuestion: b.fields.submittingQuestion,
+      errorTitle: b.error.title,
+      errorBody: b.error.body,
+      network: b.error.network,
+    })}
+    data-copy={JSON.stringify({
+      legendContact: b.legendContact,
+      legendContactQuestion: b.legendContactQuestion,
+      messageOptional: b.fields.message,
+      messageRequired: b.fields.messageRequired,
+      messagePlaceholder: b.fields.messagePlaceholder,
+      messageQuestionPlaceholder: b.fields.messageQuestionPlaceholder,
+      submit: b.fields.submit,
+      submitQuestion: b.fields.submitQuestion,
+      successTitle: b.success.title,
+      successBody: b.success.body,
+      successQuestionTitle: b.success.questionTitle,
+      successQuestionBody: b.success.questionBody,
+      disclaimerTitle: b.disclaimerTitle,
+      disclaimerText: b.disclaimerText,
+      questionDisclaimerTitle: b.questionDisclaimerTitle,
+      questionDisclaimerText: b.questionDisclaimerText,
+    })}
+  >
+    <!-- Spam Honeypot -->
+    <div
+      class="sr-only"
+      aria-hidden="true"
+      style="display:none!important;position:absolute;left:-9999px;"
+    >
+      <label for="website_trap">Do not fill this</label>
+      <input
+        type="text"
+        name="website_trap"
+        id="website_trap"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+
+    <!-- Hidden Locale -->
+    <input type="hidden" name="locale" value={locale} />
+
+    <!-- Server/Form-level Error Alert -->
+    <div
+      class="form-alert error-alert"
+      id="form-error-alert"
+      role="alert"
+      style="display: none;"
+    >
+      <div class="alert-icon" aria-hidden="true">
+        <CircleAlert size={20} class="alert-icon-svg" />
+      </div>
+      <div class="alert-text">
+        <strong id="form-error-title">{b.error.title}</strong>
+        <p id="form-error-desc">{b.error.body}</p>
+      </div>
+    </div>
+
+    <fieldset class="form-section intent-section">
+      <legend class="section-legend">{b.legendIntent}</legend>
+      <div class="intent-toggle" role="radiogroup" aria-label={b.legendIntent}>
+        <label class="intent-option">
+          <input
+            type="radio"
+            name="intent"
+            value="stay"
+            checked
+            data-intent-option
+          />
+          <span class="intent-option-ui">{b.intentStay}</span>
+        </label>
+        <label class="intent-option">
+          <input
+            type="radio"
+            name="intent"
+            value="question"
+            data-intent-option
+          />
+          <span class="intent-option-ui">{b.intentQuestion}</span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div id="stay-fields">
+      <fieldset class="form-section">
+        <legend class="section-legend">{b.legendDates}</legend>
+
+        <div class="form-row dates-row">
+          <div class="form-field">
+            <label for="checkIn" class="field-label">
+              <Calendar
+                size={15}
+                stroke-width={2}
+                class="field-icon"
+                aria-hidden="true"
+              />
+              <span>{b.fields.checkIn}</span>{' '}
+              <span class="required" aria-hidden="true">
+                *
+              </span>
+            </label>
+            <input
+              type="date"
+              id="checkIn"
+              name="checkIn"
+              required
+              class="form-input"
+              aria-required="true"
+              aria-describedby="checkIn-error"
+            />
+            <span
+              class="field-error"
+              id="checkIn-error"
+              role="alert"
+              style="display: none;"
+            ></span>
+          </div>
+
+          <div class="form-field">
+            <label for="checkOut" class="field-label">
+              <Calendar
+                size={15}
+                stroke-width={2}
+                class="field-icon"
+                aria-hidden="true"
+              />
+              <span>{b.fields.checkOut}</span>{' '}
+              <span class="required" aria-hidden="true">
+                *
+              </span>
+            </label>
+            <input
+              type="date"
+              id="checkOut"
+              name="checkOut"
+              required
+              class="form-input"
+              aria-required="true"
+              aria-describedby="checkOut-error"
+            />
+            <span
+              class="field-error"
+              id="checkOut-error"
+              role="alert"
+              style="display: none;"
+            ></span>
+          </div>
+        </div>
+
+        <div class="form-row selection-row">
+          <div class="form-field">
+            <label for="guests" class="field-label">
+              <Users
+                size={15}
+                stroke-width={2}
+                class="field-icon"
+                aria-hidden="true"
+              />
+              <span>{b.fields.guests}</span>{' '}
+              <span class="required" aria-hidden="true">
+                *
+              </span>
+            </label>
+            <select
+              id="guests"
+              name="guests"
+              required
+              class="form-select"
+              aria-required="true"
+              aria-describedby="guests-help guests-error"
+            >
+              <option value="1">{b.guestOptions.g1}</option>
+              <option value="2" selected>
+                {b.guestOptions.g2}
+              </option>
+              <option value="3">{b.guestOptions.g3}</option>
+              <option value="4">{b.guestOptions.g4}</option>
+              <option value="5">{b.guestOptions.g5}</option>
+              <option value="6">{b.guestOptions.g6}</option>
+              <option value="7">{b.guestOptions.g7}</option>
+              <option value="8">{b.guestOptions.g8}</option>
+              <option value="9">{b.guestOptions.g9}</option>
+              <option value="12">{b.guestOptions.g12}</option>
+              <option value="18">{b.guestOptions.g18}</option>
+            </select>
+            <span class="field-help" id="guests-help">
+              {b.fields.guestsHelp}
+            </span>
+            <span
+              class="field-error"
+              id="guests-error"
+              role="alert"
+              style="display: none;"
+            ></span>
+          </div>
+
+          <div class="form-field">
+            <label for="rooms" class="field-label">
+              <DoorOpen
+                size={15}
+                stroke-width={2}
+                class="field-icon"
+                aria-hidden="true"
+              />
+              <span>{b.fields.rooms}</span>
+            </label>
+            <select
+              id="rooms"
+              name="rooms"
+              class="form-select"
+              aria-describedby="rooms-help rooms-error"
+            >
+              <option value="" selected>
+                {b.fields.roomsAny}
+              </option>
+              <option value="1">{b.fields.rooms1}</option>
+              <option value="2">{b.fields.rooms2}</option>
+              <option value="3">{b.fields.rooms3}</option>
+              <option value="4">{b.fields.rooms4}</option>
+              <option value="5">{b.fields.rooms5}</option>
+              <option value="6">{b.fields.rooms6}</option>
+            </select>
+            <span class="field-help" id="rooms-help">
+              {b.fields.roomsHelp}
+            </span>
+            <span
+              class="field-error"
+              id="rooms-error"
+              role="alert"
+              style="display: none;"
+            ></span>
+          </div>
+        </div>
+
+        <div class="form-row unit-pets-row">
+          <div class="form-field">
+            <label for="accommodationId" class="field-label">
+              <BedDouble
+                size={15}
+                stroke-width={2}
+                class="field-icon"
+                aria-hidden="true"
+              />
+              <span>{b.fields.accommodation}</span>
+            </label>
+            <select
+              id="accommodationId"
+              name="accommodationId"
+              class="form-select"
+              data-initial-unit={initialUnitId}
+            >
+              <option value="bungalow-room" selected={initialUnitId !== 'all'}>
+                {b.fields.roomOption}
+              </option>
+              <option value="all" selected={initialUnitId === 'all'}>
+                {b.fields.allRooms}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-field pets-field">
+            <label for="pets" class="field-label">
+              <Dog
+                size={15}
+                stroke-width={2}
+                class="field-icon"
+                aria-hidden="true"
+              />
+              <span>{b.fields.pets}</span>
+            </label>
+            <select
+              id="pets"
+              name="pets"
+              class="form-select"
+              aria-describedby="pets-note"
+            >
+              <option value="no" selected>
+                {b.fields.petsNo}
+              </option>
+              <option value="yes">{b.fields.petsYes}</option>
+            </select>
+            <span class="field-help" id="pets-note">
+              {b.fields.petsNote}
+            </span>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+
+    <fieldset class="form-section">
+      <legend class="section-legend" id="contact-legend">
+        {b.legendContact}
+      </legend>
+
+      <div class="form-field">
+        <label for="name" class="field-label">
+          <User
+            size={15}
+            stroke-width={2}
+            class="field-icon"
+            aria-hidden="true"
+          />
+          <span>{b.fields.name}</span>{' '}
+          <span class="required" aria-hidden="true">
+            *
+          </span>
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          required
+          autocomplete="name"
+          placeholder={b.fields.namePlaceholder}
+          class="form-input"
+          aria-required="true"
+          aria-describedby="name-error"
+        />
+        <span
+          class="field-error"
+          id="name-error"
+          role="alert"
+          style="display: none;"
+        ></span>
+      </div>
+
+      <div class="form-row contact-row">
+        <div class="form-field">
+          <label for="phone" class="field-label">
+            <Phone
+              size={15}
+              stroke-width={2}
+              class="field-icon"
+              aria-hidden="true"
+            />
+            <span>{b.fields.phone}</span>{' '}
+            <span class="required" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            required
+            autocomplete="tel"
+            placeholder="+359 888 123 456"
+            class="form-input"
+            aria-required="true"
+            aria-describedby="phone-error"
+          />
+          <span
+            class="field-error"
+            id="phone-error"
+            role="alert"
+            style="display: none;"
+          ></span>
+        </div>
+
+        <div class="form-field">
+          <label for="email" class="field-label">
+            <Mail
+              size={15}
+              stroke-width={2}
+              class="field-icon"
+              aria-hidden="true"
+            />
+            <span>{b.fields.email}</span>{' '}
+            <span class="required" aria-hidden="true">
+              *
+            </span>
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="name@example.com"
+            class="form-input"
+            aria-required="true"
+            aria-describedby="email-error"
+          />
+          <span
+            class="field-error"
+            id="email-error"
+            role="alert"
+            style="display: none;"
+          ></span>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="message" class="field-label">
+          <MessageSquare
+            size={15}
+            stroke-width={2}
+            class="field-icon"
+            aria-hidden="true"
+          />
+          <span id="message-label-text">{b.fields.message}</span>
+          <span
+            class="required"
+            id="message-required-mark"
+            aria-hidden="true"
+            hidden
+          >
+            *
+          </span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          rows="3"
+          placeholder={b.fields.messagePlaceholder}
+          class="form-textarea"
+          aria-describedby="message-error"
+        ></textarea>
+        <span
+          class="field-error"
+          id="message-error"
+          role="alert"
+          style="display: none;"
+        ></span>
+      </div>
+    </fieldset>
+
+    {turnstileSiteKey && (
+      <div class="turnstile-wrapper">
+        <div
+          class="cf-turnstile"
+          data-sitekey={turnstileSiteKey}
+          data-theme="light"
+        />
+        <span
+          class="field-error"
+          id="turnstile-error"
+          role="alert"
+          style="display: none;"
+        />
+      </div>
+    )}
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary submit-btn" id="submit-btn">
+        <span class="btn-text">{b.fields.submit}</span>
+        <span class="btn-spinner" aria-hidden="true" style="display: none;">
+          <LoaderCircle size={18} class="animate-spin" />
+        </span>
+        <span class="btn-arrow" aria-hidden="true">
+          <ArrowUpRight size={18} stroke-width={2} />
+        </span>
+      </button>
+      <p class="form-phone-hint">
+        <span>{b.phoneCallout}</span>
+        <a href="tel:+359877116050" class="text-link phone-link">
+          +359 877 116 050
+        </a>
+      </p>
+    </div>
+  </form>
+
+  <!-- Polished Success State (Hidden by default) -->
+  <div
+    class="booking-success"
+    id="booking-success"
+    style="display: none;"
+    role="region"
+    aria-live="polite"
+  >
+    <div class="success-icon" aria-hidden="true">
+      <Check size={36} stroke-width={2.5} class="success-icon-svg" />
+    </div>
+    <h3 id="success-title">{b.success.title}</h3>
+    <p class="success-text" id="success-body">
+      {b.success.body}
+    </p>
+
+    <div class="success-reassurance">
+      <h4 id="success-disclaimer-title">{b.disclaimerTitle}</h4>
+      <p id="success-disclaimer-text">{b.disclaimerText}</p>
+    </div>
+
+    <div class="success-actions">
+      <a class="btn btn-primary" href="tel:+359877116050">
+        <span>{b.success.callUs}</span>
+        <ArrowUpRight size={16} stroke-width={2} aria-hidden="true" />
+      </a>
+      <a class="text-link" href={pathFor('home', locale)}>
+        <span>{b.success.backHome}</span>
+        <ArrowRight size={16} stroke-width={2} aria-hidden="true" />
+      </a>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const container = document.getElementById('booking-container');
+    const form = document.getElementById('booking-form');
+    const successView = document.getElementById('booking-success');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = submitBtn?.querySelector('.btn-text');
+    const btnSpinner = submitBtn?.querySelector('.btn-spinner');
+    const btnArrow = submitBtn?.querySelector('.btn-arrow');
+    const formErrorAlert = document.getElementById('form-error-alert');
+    const formErrorTitle = document.getElementById('form-error-title');
+    const formErrorDesc = document.getElementById('form-error-desc');
+
+    if (!form || !container) return;
+
+    // Enable client validation progressive enhancement
+    form.noValidate = true;
+
+    const stayFields = document.getElementById('stay-fields');
+    const contactLegend = document.getElementById('contact-legend');
+    const messageLabelText = document.getElementById('message-label-text');
+    const messageRequiredMark = document.getElementById(
+      'message-required-mark',
+    );
+    const messageInput = document.getElementById('message');
+    const noticeTitle = document.getElementById('booking-notice-title');
+    const noticeText = document.getElementById('booking-notice-text');
+    const notice = document.getElementById('booking-notice');
+    const successTitle = document.getElementById('success-title');
+    const successBody = document.getElementById('success-body');
+    const successDisclaimerTitle = document.getElementById(
+      'success-disclaimer-title',
+    );
+    const successDisclaimerText = document.getElementById(
+      'success-disclaimer-text',
+    );
+
+    let uiCopy = {};
+    try {
+      uiCopy = JSON.parse(form.dataset.copy || '{}');
+    } catch (_) {
+      uiCopy = {};
+    }
+
+    function getIntent() {
+      const selected = form.querySelector('input[name="intent"]:checked');
+      return selected?.value === 'question' ? 'question' : 'stay';
+    }
+
+    function setIntentMode(intent) {
+      const isQuestion = intent === 'question';
+      if (stayFields) {
+        stayFields.hidden = isQuestion;
+        stayFields.querySelectorAll('input, select, textarea').forEach((el) => {
+          el.disabled = isQuestion;
+        });
+      }
+
+      if (contactLegend) {
+        contactLegend.textContent = isQuestion
+          ? uiCopy.legendContactQuestion || contactLegend.textContent
+          : uiCopy.legendContact || contactLegend.textContent;
+      }
+
+      if (messageLabelText) {
+        messageLabelText.textContent = isQuestion
+          ? uiCopy.messageRequired || messageLabelText.textContent
+          : uiCopy.messageOptional || messageLabelText.textContent;
+      }
+
+      if (messageRequiredMark) {
+        messageRequiredMark.hidden = !isQuestion;
+      }
+
+      if (messageInput) {
+        messageInput.required = isQuestion;
+        messageInput.setAttribute(
+          'aria-required',
+          isQuestion ? 'true' : 'false',
+        );
+        messageInput.placeholder = isQuestion
+          ? uiCopy.messageQuestionPlaceholder || messageInput.placeholder
+          : uiCopy.messagePlaceholder || messageInput.placeholder;
+        messageInput.rows = isQuestion ? 5 : 3;
+      }
+
+      if (notice && noticeTitle && noticeText) {
+        noticeTitle.textContent = isQuestion
+          ? notice.dataset.questionTitle || noticeTitle.textContent
+          : notice.dataset.stayTitle || noticeTitle.textContent;
+        noticeText.textContent = isQuestion
+          ? notice.dataset.questionText || noticeText.textContent
+          : notice.dataset.stayText || noticeText.textContent;
+      }
+
+      if (btnText) {
+        btnText.textContent = isQuestion
+          ? uiCopy.submitQuestion || btnText.textContent
+          : uiCopy.submit || btnText.textContent;
+      }
+
+      if (successTitle && successBody) {
+        successTitle.textContent = isQuestion
+          ? uiCopy.successQuestionTitle || successTitle.textContent
+          : uiCopy.successTitle || successTitle.textContent;
+        successBody.textContent = isQuestion
+          ? uiCopy.successQuestionBody || successBody.textContent
+          : uiCopy.successBody || successBody.textContent;
+      }
+
+      if (successDisclaimerTitle && successDisclaimerText) {
+        successDisclaimerTitle.textContent = isQuestion
+          ? uiCopy.questionDisclaimerTitle || successDisclaimerTitle.textContent
+          : uiCopy.disclaimerTitle || successDisclaimerTitle.textContent;
+        successDisclaimerText.textContent = isQuestion
+          ? uiCopy.questionDisclaimerText || successDisclaimerText.textContent
+          : uiCopy.disclaimerText || successDisclaimerText.textContent;
+      }
+    }
+
+    form.querySelectorAll('[data-intent-option]').forEach((input) => {
+      input.addEventListener('change', () => {
+        setIntentMode(getIntent());
+        clearErrors();
+      });
+    });
+
+    // 1. Check status and preselect fields from URL query
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('status') === 'success') {
+        const hasProof =
+          document.cookie.includes('nest_enquiry_ok=1') ||
+          sessionStorage.getItem('nest_enquiry_ok') === '1';
+        if (hasProof) {
+          form.style.display = 'none';
+          if (successView) successView.style.display = 'block';
+          sessionStorage.removeItem('nest_enquiry_ok');
+          document.cookie = 'nest_enquiry_ok=; Path=/; Max-Age=0; SameSite=Lax';
+        }
+      } else if (urlParams.get('status') === 'error') {
+        if (formErrorAlert) formErrorAlert.style.display = 'flex';
+      }
+
+      const requestedIntent = urlParams.get('intent');
+      if (requestedIntent === 'question' || requestedIntent === 'ask') {
+        const questionRadio = form.querySelector(
+          'input[name="intent"][value="question"]',
+        );
+        if (questionRadio) {
+          questionRadio.checked = true;
+        }
+      }
+
+      const requestedUnit = urlParams.get('room') || urlParams.get('unit');
+      if (requestedUnit) {
+        const select = document.getElementById('accommodationId');
+        if (select) {
+          const match = Array.from(select.options).find(
+            (opt) => opt.value === requestedUnit,
+          );
+          if (match) {
+            select.value = requestedUnit;
+          }
+        }
+      }
+
+      const requestedRooms = urlParams.get('rooms');
+      if (requestedRooms) {
+        const selectRooms = document.getElementById('rooms');
+        if (selectRooms) {
+          selectRooms.value = requestedRooms;
+        }
+      }
+
+      const requestedGuests = urlParams.get('guests');
+      if (requestedGuests) {
+        const selectGuests = document.getElementById('guests');
+        if (selectGuests) {
+          selectGuests.value = requestedGuests;
+        }
+      }
+    } catch (_) {}
+
+    setIntentMode(getIntent());
+
+    // 2. Client-side date min bounds
+    const checkInInput = document.getElementById('checkIn');
+    const checkOutInput = document.getElementById('checkOut');
+
+    if (checkInInput && checkOutInput) {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+      checkInInput.min = todayStr;
+
+      checkInInput.addEventListener('change', () => {
+        if (checkInInput.value) {
+          const inDate = new Date(checkInInput.value);
+          if (!isNaN(inDate.getTime())) {
+            inDate.setDate(inDate.getDate() + 1);
+            const nextDayStr = `${inDate.getFullYear()}-${pad(inDate.getMonth() + 1)}-${pad(inDate.getDate())}`;
+            checkOutInput.min = nextDayStr;
+            if (
+              checkOutInput.value &&
+              checkOutInput.value <= checkInInput.value
+            ) {
+              checkOutInput.value = nextDayStr;
+            }
+          }
+        }
+      });
+    }
+
+    // Helper: Clear inline errors
+    function clearErrors() {
+      if (formErrorAlert) formErrorAlert.style.display = 'none';
+      container.querySelectorAll('.field-error').forEach((el) => {
+        el.textContent = '';
+        el.style.display = 'none';
+      });
+      container
+        .querySelectorAll('.form-input, .form-select, .form-textarea')
+        .forEach((el) => {
+          el.removeAttribute('aria-invalid');
+          el.classList.remove('has-error');
+        });
+    }
+
+    // Helper: Show error on a field
+    function showFieldError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      const errorEl = document.getElementById(`${fieldId}-error`);
+      if (field) {
+        field.setAttribute('aria-invalid', 'true');
+        field.classList.add('has-error');
+      }
+      if (errorEl) {
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    // 3. Form submission with Progressive Enhancement
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErrors();
+
+      // Client-side quick validation
+      let hasError = false;
+      let firstErrorField = null;
+      const intent = getIntent();
+      const isQuestion = intent === 'question';
+
+      const messages = JSON.parse(form.dataset.validation || '{}');
+
+      if (!isQuestion) {
+        if (!checkInInput.value) {
+          showFieldError('checkIn', messages.checkInRequired);
+          hasError = true;
+          firstErrorField = firstErrorField || checkInInput;
+        }
+
+        if (!checkOutInput.value) {
+          showFieldError('checkOut', messages.checkOutRequired);
+          hasError = true;
+          firstErrorField = firstErrorField || checkOutInput;
+        } else if (
+          checkInInput.value &&
+          checkOutInput.value <= checkInInput.value
+        ) {
+          showFieldError('checkOut', messages.checkOutAfter);
+          hasError = true;
+          firstErrorField = firstErrorField || checkOutInput;
+        }
+      }
+
+      const nameInput = document.getElementById('name');
+      if (!nameInput.value.trim() || nameInput.value.trim().length < 2) {
+        showFieldError('name', messages.nameRequired);
+        hasError = true;
+        firstErrorField = firstErrorField || nameInput;
+      }
+
+      const phoneInput = document.getElementById('phone');
+      const phoneDigits = phoneInput.value.replace(/\D/g, '');
+      if (!phoneInput.value.trim() || phoneDigits.length < 7) {
+        showFieldError('phone', messages.phoneRequired);
+        hasError = true;
+        firstErrorField = firstErrorField || phoneInput;
+      }
+
+      const emailInput = document.getElementById('email');
+      const emailRegex = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+      if (
+        !emailInput.value.trim() ||
+        !emailRegex.test(emailInput.value.trim())
+      ) {
+        showFieldError('email', messages.emailRequired);
+        hasError = true;
+        firstErrorField = firstErrorField || emailInput;
+      }
+
+      if (isQuestion) {
+        const messageValue = (messageInput?.value || '').trim();
+        if (messageValue.length < 5) {
+          showFieldError('message', messages.messageRequired);
+          hasError = true;
+          firstErrorField = firstErrorField || messageInput;
+        }
+      }
+
+      if (hasError) {
+        firstErrorField?.focus();
+        return;
+      }
+
+      // Collect data
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.intent = intent;
+      if (isQuestion) {
+        delete data.checkIn;
+        delete data.checkOut;
+        delete data.guests;
+        delete data.rooms;
+        delete data.accommodationId;
+        delete data.pets;
+      } else {
+        data.guests = parseInt(data.guests, 10);
+        if (data.rooms) {
+          data.rooms = parseInt(data.rooms, 10);
+        } else {
+          delete data.rooms;
+        }
+        data.pets = data.pets === 'yes';
+      }
+
+      // Turnstile anti-spam token handling
+      const turnstileToken =
+        formData.get('cf-turnstile-response') ||
+        (typeof window.turnstile !== 'undefined' &&
+        typeof window.turnstile.getResponse === 'function'
+          ? window.turnstile.getResponse()
+          : undefined);
+      if (turnstileToken) {
+        data.turnstileToken = String(turnstileToken);
+        data['cf-turnstile-response'] = String(turnstileToken);
+      }
+
+      // Submit state
+      submitBtn.disabled = true;
+      if (btnSpinner) btnSpinner.style.display = 'inline-flex';
+      if (btnArrow) btnArrow.style.display = 'none';
+      const originalText = btnText?.textContent;
+      if (btnText) {
+        btnText.textContent = isQuestion
+          ? messages.submittingQuestion || messages.submitting
+          : messages.submitting;
+      }
+
+      try {
+        const response = await fetch('/api/booking', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(data),
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok && result.ok) {
+          // Success!
+          try {
+            sessionStorage.setItem('nest_enquiry_ok', '1');
+          } catch (_) {}
+          form.style.display = 'none';
+          if (successView) {
+            successView.style.display = 'block';
+            successView.scrollIntoView({
+              behavior: 'smooth',
+              block: 'nearest',
+            });
+          }
+        } else {
+          // Server validation errors
+          if (result.errors) {
+            Object.entries(result.errors).forEach(([field, msg]) => {
+              showFieldError(field, msg);
+            });
+          }
+          if (formErrorAlert) {
+            if (formErrorTitle)
+              formErrorTitle.textContent = messages.errorTitle;
+            if (formErrorDesc)
+              formErrorDesc.textContent = result.message || messages.errorBody;
+            formErrorAlert.style.display = 'flex';
+          }
+          if (
+            typeof window.turnstile !== 'undefined' &&
+            typeof window.turnstile.reset === 'function'
+          ) {
+            try {
+              window.turnstile.reset();
+            } catch (_) {}
+          }
+          submitBtn.disabled = false;
+        }
+      } catch (err) {
+        if (formErrorAlert) {
+          if (formErrorDesc) formErrorDesc.textContent = messages.network;
+          formErrorAlert.style.display = 'flex';
+        }
+        if (
+          typeof window.turnstile !== 'undefined' &&
+          typeof window.turnstile.reset === 'function'
+        ) {
+          try {
+            window.turnstile.reset();
+          } catch (_) {}
+        }
+        submitBtn.disabled = false;
+      } finally {
+        if (btnSpinner) btnSpinner.style.display = 'none';
+        if (btnArrow) btnArrow.style.display = 'inline-flex';
+        if (btnText && originalText) btnText.textContent = originalText;
+      }
+    });
+  })();
+</script>
+
+<style>
+  .booking-panel {
+    color: var(--ink);
+  }
+
+  .booking-notice {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.85rem;
+    align-items: start;
+    padding: 1rem 0 1.5rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.92rem;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .booking-notice strong {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--forest);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .booking-notice p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .notice-icon {
+    color: var(--sea);
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .intent-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .intent-option {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .intent-option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .intent-option-ui {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.7rem 1rem;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    background: #ffffff;
+    border: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
+    border-radius: var(--radius, 8px);
+    transition:
+      border-color var(--motion-fast) var(--ease-out),
+      background-color var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out),
+      color var(--motion-fast) var(--ease-out);
+  }
+
+  .intent-option:hover .intent-option-ui {
+    border-color: color-mix(in srgb, var(--forest) 28%, var(--line));
+  }
+
+  .intent-option input:focus-visible + .intent-option-ui {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--forest) 16%, transparent);
+  }
+
+  .intent-option input:checked + .intent-option-ui {
+    color: var(--forest);
+    border-color: var(--forest);
+    background: color-mix(in srgb, var(--forest) 8%, white);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--forest) 35%, transparent);
+  }
+
+  #stay-fields[hidden] {
+    display: none !important;
+  }
+
+  .form-alert {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius, 8px);
+    margin-bottom: 1.5rem;
+  }
+
+  .error-alert {
+    background: color-mix(in srgb, #c53030 6%, white);
+    border: 1px solid color-mix(in srgb, #c53030 28%, var(--line));
+    color: #9b1c1c;
+  }
+
+  .alert-icon {
+    display: flex;
+    align-items: flex-start;
+    color: #c53030;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .alert-icon-svg {
+    color: #c53030;
+  }
+
+  .alert-text p {
+    margin: 0.25rem 0 0;
+    font-size: 0.88rem;
+  }
+
+  .form-section {
+    border: none;
+    padding: 0;
+    margin: 0 0 2.25rem;
+  }
+
+  .section-legend {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sea);
+    margin: 0 0 1.15rem;
+    padding: 0;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.35rem 1.5rem;
+    margin-bottom: 1.35rem;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.35rem;
+  }
+
+  .form-row .form-field {
+    margin-bottom: 0;
+  }
+
+  .field-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .field-icon {
+    color: var(--sea);
+    flex-shrink: 0;
+  }
+
+  .required {
+    color: color-mix(in srgb, #c53030 80%, var(--ink));
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 0.95rem;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    background: #ffffff;
+    border: 1px solid color-mix(in srgb, var(--line) 88%, var(--ink));
+    border-radius: var(--radius, 8px);
+    transition:
+      border-color var(--motion-fast) var(--ease-out),
+      box-shadow var(--motion-fast) var(--ease-out),
+      background-color var(--motion-fast) var(--ease-out);
+  }
+
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236a8588' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.4rem;
+  }
+
+  .form-textarea {
+    min-height: 6.5rem;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: color-mix(in srgb, var(--muted) 75%, transparent);
+  }
+
+  .form-input:hover,
+  .form-select:hover,
+  .form-textarea:hover {
+    border-color: color-mix(in srgb, var(--forest) 28%, var(--line));
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--forest);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--forest) 16%, transparent);
+  }
+
+  .form-input.has-error,
+  .form-select.has-error,
+  .form-textarea.has-error {
+    border-color: #c53030;
+    background-color: color-mix(in srgb, #c53030 4%, white);
+  }
+
+  .field-help {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    line-height: 1.4;
+  }
+
+  .field-error {
+    font-size: 0.8rem;
+    color: #c53030;
+    margin-top: 0.4rem;
+    font-weight: 550;
+  }
+
+  .turnstile-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 0.5rem 0 0.25rem;
+    min-height: 65px;
+  }
+
+  .form-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--line);
+    margin-top: 0.5rem;
+  }
+
+  .submit-btn {
+    min-width: min(100%, 18rem);
+    justify-content: center;
+    font-size: 1.02rem;
+    min-height: 3.25rem;
+    cursor: pointer;
+  }
+
+  .submit-btn[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--motion-fast) var(--ease-out);
+  }
+
+  .submit-btn:hover .btn-arrow {
+    transform: translate(2px, -2px);
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+
+  .form-phone-hint {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.65rem;
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .phone-link {
+    font-size: 0.88rem;
+  }
+
+  .booking-success {
+    text-align: left;
+    padding: clamp(0.5rem, 2vw, 1rem) 0;
+  }
+
+  .success-icon {
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0 0 1.35rem;
+    border-radius: var(--radius, 8px);
+    background: color-mix(in srgb, var(--forest) 10%, var(--paper));
+    color: var(--forest);
+  }
+
+  .success-icon-svg {
+    color: var(--forest);
+  }
+
+  .booking-success h3 {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin: 0 0 0.85rem;
+  }
+
+  .success-text {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 48ch;
+    margin: 0 0 1.75rem;
+    line-height: 1.6;
+  }
+
+  .success-reassurance {
+    padding: 1.15rem 0 0;
+    border-top: 1px solid var(--line);
+    max-width: 42rem;
+    margin: 0 0 2rem;
+  }
+
+  .success-reassurance h4 {
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sea);
+  }
+
+  .success-reassurance p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .success-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 700px) {
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 1.15rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .form-input,
+    .form-select,
+    .form-textarea,
+    .btn-arrow,
+    .animate-spin {
+      transition: none;
+      animation: none;
+    }
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  widths?: number[];
+  sizes?: string;
+  focalPoint?: string;
+  objectPosition?: string;
+  aspectRatio?: string;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  decoding?: 'async' | 'sync' | 'auto';
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  caption,
+  widths = [320, 640, 960, 1280, 1440],
+  sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw',
+  focalPoint,
+  objectPosition,
+  aspectRatio,
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  decoding = 'async',
+  class: className,
+} = Astro.props;
+
+const effectivePosition = focalPoint || objectPosition;
+const reservedRatio =
+  aspectRatio ??
+  (src.width > 0 && src.height > 0
+    ? `${src.width} / ${src.height}`
+    : undefined);
+
+const frameStyle = [
+  reservedRatio ? `aspect-ratio: ${reservedRatio};` : '',
+  effectivePosition ? `--photo-object-position: ${effectivePosition};` : '',
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<figure
+  class:list={['property-photo-frame', className]}
+  style={frameStyle || undefined}
+>
+  <Image
+    src={src}
+    alt={alt}
+    widths={widths}
+    sizes={sizes}
+    loading={loading}
+    fetchpriority={fetchpriority}
+    decoding={decoding}
+    style={
+      effectivePosition ? `object-position: ${effectivePosition};` : undefined
+    }
+  />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .property-photo-frame {
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--radius, 8px);
+    background: var(--paper-deep);
+  }
+
+  .property-photo-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--photo-object-position, center);
+    display: block;
+    transition: transform var(--motion-normal, 250ms)
+      var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1));
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .property-photo-frame:hover img {
+      transform: scale(1.02);
+    }
+  }
+
+  .property-photo-frame figcaption {
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 0.7rem 0 0;
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+</style>

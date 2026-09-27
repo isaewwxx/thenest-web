@@ -1,7 +1,471 @@
 ---
-import DevelopmentImage from './DevelopmentImage.astro'; import Lightbox from './Lightbox.astro'; import type { Locale } from '../data/types'; import type { Translation } from '../i18n/bg'; import type { ImageMetadata } from 'astro'; import alternate from '../assets/development/veranda-study.png';
-const {locale,copy,heroImage,full=false}=Astro.props as {locale:Locale;copy:Translation;heroImage:ImageMetadata;full?:boolean}; const alt=locale==='bg'?'Илюстрация на бунгало сред зеленина край морето':'Illustration of a bungalow among greenery by the sea';
+import { Image } from 'astro:assets';
+import Lightbox from './Lightbox.astro';
+import type { Locale, Photo } from '../data/types';
+import type { Translation } from '../i18n/bg';
+import { gallery } from '../data/gallery';
+import { Maximize2 } from '@lucide/astro';
+
+interface Props {
+  locale: Locale;
+  copy: Translation;
+  full?: boolean;
+}
+
+const { locale, copy, full = false } = Astro.props;
+
+// For the home preview, select a curated variety of highlights
+const previewIds = [
+  'bungalow-daylight-lawn',
+  'room-interior-wide',
+  'kitchenette-counter',
+  'shared-communal-kitchen',
+  'garden-veranda-walkway',
+  'location-sea-view-aerial',
+];
+
+const photos: readonly Photo[] = full
+  ? gallery
+  : previewIds.map((id) => gallery.find((p) => p.id === id)!).filter(Boolean);
+
+function getOrientation(photo: Photo) {
+  const ratio = photo.src.width / photo.src.height;
+  if (ratio < 0.55) return 'ultra-tall';
+  if (ratio < 0.95) return 'portrait';
+  if (ratio > 1.65) return 'wide';
+  return 'landscape';
+}
+
+const categories = [
+  { id: 'all', label: copy.gallery.categories.all },
+  { id: 'exterior', label: copy.gallery.categories.exterior },
+  { id: 'rooms', label: copy.gallery.categories.rooms },
+  { id: 'kitchenette', label: copy.gallery.categories.kitchenette },
+  { id: 'bathroom', label: copy.gallery.categories.bathroom },
+  { id: 'shared', label: copy.gallery.categories.shared },
+  { id: 'garden', label: copy.gallery.categories.garden },
+  { id: 'brand', label: copy.gallery.categories.brand },
+  { id: 'location', label: copy.gallery.categories.location },
+];
 ---
-<div class:list-full={full} class="gallery-grid"><a href={heroImage.src} data-lightbox data-alt={alt} data-caption={copy.ui.illustration}><DevelopmentImage src={heroImage} locale={locale} copy={copy} alt={alt} /></a>{full && <><a class="gallery-placeholder" href={alternate.src} data-lightbox data-alt={alt}><DevelopmentImage src={alternate} locale={locale} copy={copy} alt={alt} /></a><div class="gallery-note"><p>{copy.gallery.notice}</p><p>{copy.gallery.empty}</p></div></>}</div><Lightbox locale={locale} copy={copy} />
-<style>.gallery-grid{display:grid;grid-template-columns:1.35fr .8fr;gap:1.4rem;align-items:start}.gallery-grid>a{text-decoration:none;display:block;overflow:hidden}.gallery-grid>a:first-child{grid-row:span 2}.gallery-grid>a:first-child img{aspect-ratio:4/5}.gallery-grid>a:nth-child(2) img{aspect-ratio:4/3}.gallery-grid>a:hover img{transform:scale(1.025);transition:transform .6s ease}.gallery-grid img{transition:transform .6s ease}.gallery-note{padding:1.5rem;border-top:1px solid var(--line);color:var(--muted);align-self:stretch}.gallery-note p{margin:0 0 .8rem}.gallery-grid:not(.list-full){grid-template-columns:1fr}.gallery-grid:not(.list-full)>a:first-child img{aspect-ratio:16/9}@media(max-width:700px){.gallery-grid,.gallery-grid.list-full{grid-template-columns:1fr}.gallery-grid>a:first-child{grid-row:auto}.gallery-grid img,.gallery-grid>a:first-child img{aspect-ratio:4/3}.gallery-note{padding:1rem 0}}
+
+<div class:list={['property-gallery-wrapper', { 'is-full': full }]}>
+  {full && (
+    <div
+      class="gallery-filters"
+      role="group"
+      aria-label={copy.gallery.filterAria}
+    >
+      {categories.map((cat, idx) => (
+        <button
+          type="button"
+          class:list={['filter-pill', { 'is-active': idx === 0 }]}
+          data-category-filter={cat.id}
+          aria-pressed={idx === 0 ? 'true' : 'false'}
+        >
+          {cat.label}
+        </button>
+      ))}
+    </div>
+  )}
+
+  <div
+    class:list={['gallery-grid', { 'preview-grid': !full, 'full-grid': full }]}
+  >
+    {photos.map((photo, index) => {
+      const orientation = getOrientation(photo);
+      const isPortrait =
+        orientation === 'portrait' || orientation === 'ultra-tall';
+      return (
+        <figure
+          class:list={[
+            'gallery-item',
+            `orientation-${orientation}`,
+            { 'is-portrait': isPortrait, 'is-landscape': !isPortrait },
+          ]}
+          data-category={photo.category}
+          data-orientation={orientation}
+          data-index={index}
+        >
+          <a
+            href={photo.src.src}
+            data-lightbox
+            data-alt={photo.alt[locale]}
+            data-caption={photo.caption[locale]}
+            class="gallery-link"
+            aria-label={`${photo.caption[locale]} (${copy.ui.enlarge})`}
+          >
+            <div class="image-wrap">
+              <Image
+                src={photo.src}
+                alt={photo.alt[locale]}
+                widths={[320, 640, 960, 1280]}
+                sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 33vw"
+                loading={index < 3 ? 'eager' : 'lazy'}
+              />
+              <div class="image-overlay">
+                <span class="overlay-icon" aria-hidden="true">
+                  <Maximize2 size={18} stroke-width={2} />
+                </span>
+              </div>
+            </div>
+            <figcaption class="photo-caption">
+              <span class="photo-title">{photo.caption[locale]}</span>
+            </figcaption>
+          </a>
+        </figure>
+      );
+    })}
+  </div>
+
+  {full && (
+    <div class="gallery-source-note">
+      <p>{copy.gallery.notice}</p>
+    </div>
+  )}
+</div>
+
+<Lightbox locale={locale} copy={copy} />
+
+{full && <script is:inline>
+  const filterButtons = document.querySelectorAll('[data-category-filter]');
+  const galleryItems = document.querySelectorAll('.gallery-item');
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-category-filter');
+      filterButtons.forEach((b) => {
+        b.classList.remove('is-active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-pressed', 'true');
+
+      galleryItems.forEach((item) => {
+        const itemCat = item.getAttribute('data-category');
+        if (
+          cat === 'all' ||
+          itemCat === cat ||
+          (cat === 'brand' && itemCat === 'entrance')
+        ) {
+          item.style.display = '';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>}
+
+<style>
+  .property-gallery-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* Filters */
+  .gallery-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .filter-pill {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius, 8px);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-subtle);
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease,
+      color 0.2s ease,
+      transform 0.15s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .filter-pill:hover {
+    border-color: var(--forest);
+    color: var(--forest);
+    background: var(--paper-deep);
+    transform: translateY(-1px);
+  }
+
+  .filter-pill.is-active {
+    background: var(--forest);
+    color: #f7f5ed;
+    border-color: var(--forest);
+    box-shadow: var(--shadow-card);
+  }
+
+  .filter-pill:active {
+    transform: scale(0.98);
+  }
+
+  /* Full Grid (Gallery Page) - 21st.dev Asymmetrical Bento Layout */
+  .full-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: 1.5rem;
+  }
+
+  .full-grid .gallery-item.is-portrait {
+    grid-row: span 2;
+  }
+
+  .full-grid .gallery-item.orientation-ultra-tall {
+    grid-row: span 2;
+  }
+
+  .full-grid .gallery-item.is-landscape .image-wrap {
+    aspect-ratio: 3 / 2;
+  }
+
+  .full-grid .gallery-item.is-portrait .image-wrap {
+    height: 100%;
+  }
+
+  .full-grid .gallery-item.orientation-ultra-tall .image-wrap img {
+    object-position: center 25%;
+  }
+
+  /* Preview Grid (Homepage) */
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-flow: dense;
+    gap: 1.25rem;
+  }
+
+  .preview-grid .gallery-item:nth-child(1) {
+    grid-column: span 7;
+    grid-row: span 2;
+  }
+
+  .preview-grid .gallery-item:nth-child(2) {
+    grid-column: span 5;
+  }
+
+  .preview-grid .gallery-item:nth-child(3) {
+    grid-column: span 5;
+  }
+
+  .preview-grid .gallery-item:nth-child(4) {
+    grid-column: span 4;
+  }
+
+  .preview-grid .gallery-item:nth-child(5) {
+    grid-column: span 4;
+    grid-row: span 2;
+  }
+
+  .preview-grid .gallery-item:nth-child(6) {
+    grid-column: span 4;
+  }
+
+  .preview-grid .gallery-item:nth-child(1) .image-wrap {
+    aspect-ratio: 16 / 10;
+  }
+
+  .preview-grid .gallery-item.is-portrait .image-wrap {
+    aspect-ratio: 3 / 4;
+  }
+
+  .preview-grid .gallery-item.is-landscape .image-wrap {
+    aspect-ratio: 3 / 2;
+  }
+
+  .gallery-item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .gallery-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    border-radius: var(--radius, 8px);
+    overflow: hidden;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-subtle);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
+  }
+
+  .gallery-link:hover,
+  .gallery-link:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+    border-color: var(--forest);
+  }
+
+  .gallery-link:focus-visible {
+    outline: 2px solid var(--forest);
+    outline-offset: 2px;
+  }
+
+  .image-wrap {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    flex-grow: 1;
+    overflow: hidden;
+    background: var(--paper-deep);
+  }
+
+  .image-wrap img {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .gallery-item.is-portrait .image-wrap img,
+  .gallery-item.orientation-ultra-tall .image-wrap img {
+    object-position: center 30%;
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .gallery-link:hover .image-wrap img {
+      transform: scale(1.02);
+    }
+  }
+
+  .image-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 38, 27, 0.25);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+  }
+
+  .gallery-link:hover .image-overlay,
+  .gallery-link:focus-visible .image-overlay {
+    opacity: 1;
+  }
+
+  .overlay-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius, 8px);
+    background: rgba(18, 36, 26, 0.88);
+    color: #f7f5ed;
+    border: 1px solid rgba(247, 245, 237, 0.2);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition:
+      transform 0.2s ease,
+      background 0.2s ease;
+  }
+
+  .gallery-link:hover .overlay-icon {
+    transform: scale(1.05);
+    background: rgba(18, 36, 26, 0.95);
+  }
+
+  .photo-caption {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: var(--ink);
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+  }
+
+  .photo-title {
+    line-height: 1.35;
+    font-weight: 500;
+  }
+
+  .gallery-source-note {
+    padding: 1.5rem;
+    background: var(--paper-deep);
+    border: 1px solid var(--line);
+    border-radius: var(--radius, 8px);
+    margin-top: 1.5rem;
+  }
+
+  .gallery-source-note p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 960px) {
+    .full-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.25rem;
+    }
+    .preview-grid {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .preview-grid .gallery-item:nth-child(1) {
+      grid-column: span 6;
+      grid-row: auto;
+    }
+    .preview-grid .gallery-item:nth-child(2),
+    .preview-grid .gallery-item:nth-child(3),
+    .preview-grid .gallery-item:nth-child(4),
+    .preview-grid .gallery-item:nth-child(5),
+    .preview-grid .gallery-item:nth-child(6) {
+      grid-column: span 3;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .preview-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+    }
+    .preview-grid .gallery-item:nth-child(n) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .full-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.25rem;
+    }
+    .full-grid .gallery-item.is-portrait,
+    .full-grid .gallery-item.orientation-ultra-tall {
+      grid-row: auto;
+    }
+    .full-grid .gallery-item.is-portrait .image-wrap {
+      aspect-ratio: 3 / 4;
+    }
+    .full-grid .gallery-item.is-landscape .image-wrap {
+      aspect-ratio: 3 / 2;
+    }
+    .gallery-filters {
+      gap: 0.4rem;
+    }
+    .filter-pill {
+      font-size: 0.78rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
 </style>

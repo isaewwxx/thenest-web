@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageShell from '../components/PageShell.astro';
+import { pathFor } from '../lib/routes';
+import { t } from '../i18n';
+
+const copy = t('bg');
+---
+
+<BaseLayout
+  locale="bg"
+  page="home"
+  title={copy.notFound.title}
+  description={copy.notFound.text}
+>
+  <PageShell>
+    <section class="not-found container" aria-labelledby="not-found-title">
+      <p class="eyebrow">404</p>
+      <h1 id="not-found-title">{copy.notFound.title}</h1>
+      <p>{copy.notFound.text}</p>
+      <a class="btn btn-primary" href={pathFor('home', 'bg')}>
+        Към началото
+      </a>
+      <a class="text-link" href={pathFor('home', 'en')} lang="en">
+        English version
+      </a>
+    </section>
+  </PageShell>
+</BaseLayout>
+
+<style>
+  .not-found {
+    min-height: min(60vh, 36rem);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .not-found h1 {
+    max-width: 20ch;
+    font-size: clamp(2.2rem, 6vw, 4.8rem);
+  }
+
+  .not-found p:not(.eyebrow) {
+    max-width: 42ch;
+    color: var(--muted);
+    margin: 0 0 0.75rem;
+  }
+
+  .not-found .text-link {
+    margin-top: 0.25rem;
+  }
+</style>

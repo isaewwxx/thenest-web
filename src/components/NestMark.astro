@@ -1,0 +1,50 @@
+---
+import { Image } from 'astro:assets';
+import nestMark from '../assets/brand/nest-mark.png';
+
+interface Props {
+  class?: string;
+  size?: number;
+  alt?: string;
+}
+
+const { class: className = '', size = 40, alt = '' } = Astro.props;
+const decorative = alt === '';
+---
+
+<span
+  class:list={['nest-mark', className]}
+  style={`--nest-mark-size: ${size}px`}
+  aria-hidden={decorative ? 'true' : undefined}
+>
+  <Image
+    src={nestMark}
+    alt={alt}
+    width={512}
+    height={512}
+    widths={[size * 2, size * 3, 128, 192]}
+    sizes={`${size}px`}
+    loading="eager"
+    decoding="async"
+    class="nest-mark-img"
+  />
+</span>
+
+<style>
+  .nest-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 0;
+    width: var(--nest-mark-size, 2.5rem);
+    height: var(--nest-mark-size, 2.5rem);
+  }
+
+  .nest-mark-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+</style>
