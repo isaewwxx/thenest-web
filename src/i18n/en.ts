@@ -115,10 +115,7 @@ export const en: Translation = {
     bookingLink: 'Guest reviews on Booking.com',
     airbnbLink: 'Guest reviews on Airbnb',
   },
-  policies: {
-    draftNotice:
-      'This document still contains operator and contact placeholders. Complete them before the website is made public.',
-  },
+  policies: {},
   home: {
     brand: 'The Nest',
     eyebrow: 'Lozenets',

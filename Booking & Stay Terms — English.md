@@ -4,11 +4,11 @@ Last updated: 30 September 2026
 
 These policies cover stays at The Nest Bungalows / Бунгала „Гнездото“ in Lozenets, Bulgaria.
 
-Accommodation operator: **[LEGAL NAME OF INDIVIDUAL OR BUSINESS]**  
-UIC/BULSTAT, if applicable: **[UIC/BULSTAT]**  
-Correspondence address: **[ADDRESS]**  
-Email: **[EMAIL]**  
-Phone: **[PHONE]**  
+Accommodation operator: **Vasil Syakolov**  
+UIC/BULSTAT, if applicable: **Not applicable (no UIC/BULSTAT)**  
+Correspondence address: **12 Osogovo Street, 8277 Lozenets, Bulgaria**  
+Email: **gnezdoto.lozenets@gmail.com**  
+Phone: **+359877116050**  
 Accommodation registration/licence number: **Ц2-0ФА-Г33-С0**
 
 ---
@@ -135,6 +135,6 @@ This is separate from our own cancellation policy described above.
 
 If a problem comes up during your stay, please contact us as soon as you can so we have a chance to address it.
 
-Complaints following a stay may be sent to **[EMAIL]**.
+Complaints following a stay may be sent to **gnezdoto.lozenets@gmail.com**.
 
 These terms do not restrict mandatory consumer rights provided by Bulgarian or European Union law.

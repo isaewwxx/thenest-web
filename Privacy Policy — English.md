@@ -4,11 +4,11 @@ Last updated: 30 September 2026
 
 These policies cover stays at The Nest Bungalows / Бунгала „Гнездото“ in Lozenets, Bulgaria.
 
-Accommodation operator: **[LEGAL NAME OF INDIVIDUAL OR BUSINESS]**  
-UIC/BULSTAT, if applicable: **[UIC/BULSTAT]**  
-Correspondence address: **[ADDRESS]**  
-Email: **[EMAIL]**  
-Phone: **[PHONE]**  
+Accommodation operator: **Vasil Syakolov**  
+UIC/BULSTAT, if applicable: **Not applicable (no UIC/BULSTAT)**  
+Correspondence address: **12 Osogovo Street, 8277 Lozenets, Bulgaria**  
+Email: **gnezdoto.lozenets@gmail.com**  
+Phone: **+359877116050**  
 Accommodation registration/licence number: **Ц2-0ФА-Г33-С0**
 
 ---
@@ -17,10 +17,10 @@ Accommodation registration/licence number: **Ц2-0ФА-Г33-С0**
 
 The data controller for personal information connected with direct enquiries and bookings is:
 
-**[OPERATOR LEGAL NAME]**, operator of The Nest Bungalows  
-Address: **[ADDRESS]**  
-Privacy contact email: **[EMAIL]**  
-Phone: **[PHONE]**
+**Vasil Syakolov**, operator of The Nest Bungalows  
+Address: **12 Osogovo Street, 8277 Lozenets, Bulgaria**  
+Privacy contact email: **gnezdoto.lozenets@gmail.com**  
+Phone: **+359877116050**
 
 ## Information we process
 
@@ -99,7 +99,7 @@ Under the General Data Protection Regulation, you may have the right to access y
 
 Where processing is based on consent, consent may be withdrawn at any time. Withdrawal does not affect processing that was lawful before withdrawal.
 
-Requests may be sent to **[EMAIL]**.
+Requests may be sent to **gnezdoto.lozenets@gmail.com**.
 
 We may request reasonable information to verify your identity where this is necessary to protect your personal data.
 

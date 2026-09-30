@@ -31,9 +31,6 @@ const PolicyContent = documentContents[page][locale];
 <div class="standard-page policy-page">
   <div class="container policy-layout">
     <p class="eyebrow policy-eyebrow">{copy.footer.legalHeading}</p>
-    <aside class="policy-draft-note" role="note">
-      {copy.policies.draftNotice}
-    </aside>
     <article class="policy-article">
       <div class="policy-content">
         <PolicyContent />
@@ -45,33 +42,24 @@ const PolicyContent = documentContents[page][locale];
 <style>
   .policy-layout {
     display: grid;
-    gap: 1.25rem;
-    max-width: 920px;
+    gap: clamp(0.85rem, 1.8vw, 1.25rem);
+    max-width: 880px;
   }
 
   .policy-eyebrow {
     margin: 0;
   }
 
-  .policy-draft-note {
-    padding: 0.8rem 1rem;
-    border-left: 2px solid var(--sea);
-    background: color-mix(in srgb, var(--paper-deep) 72%, white);
-    color: var(--muted);
-    font-size: 0.84rem;
-    line-height: 1.55;
-  }
-
   .policy-article {
     min-width: 0;
-    padding: clamp(1.25rem, 4vw, 3rem);
+    padding: clamp(1.2rem, 3.4vw, 2.5rem);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--paper);
   }
 
   .policy-content :global(h1) {
-    margin: 0 0 1.25rem;
+    margin: 0 0 1rem;
     color: var(--forest);
     font-family: var(--font-heading);
     font-size: clamp(2rem, 5vw, 3.15rem);
@@ -81,8 +69,8 @@ const PolicyContent = documentContents[page][locale];
   }
 
   .policy-content :global(h2) {
-    margin: 2rem 0 0.75rem;
-    padding-top: 1.35rem;
+    margin: 1.65rem 0 0.6rem;
+    padding-top: 1rem;
     border-top: 1px solid var(--line);
     color: var(--forest);
     font-family: var(--font-heading);
@@ -92,25 +80,25 @@ const PolicyContent = documentContents[page][locale];
   }
 
   .policy-content :global(h1 + p) {
-    margin: 0 0 1.5rem;
+    margin: 0 0 1.15rem;
     color: var(--muted);
     font-size: 0.88rem;
   }
 
   .policy-content :global(p) {
     max-width: 72ch;
-    margin: 0 0 0.9rem;
+    margin: 0 0 0.75rem;
     color: var(--ink);
     font-size: 0.96rem;
-    line-height: 1.75;
+    line-height: 1.7;
     overflow-wrap: anywhere;
   }
 
   .policy-content :global(ul),
   .policy-content :global(ol) {
     display: grid;
-    gap: 0.55rem;
-    margin: 0.65rem 0 1rem;
+    gap: 0.4rem;
+    margin: 0.55rem 0 0.9rem;
     padding-left: 1.35rem;
     color: var(--ink);
     line-height: 1.7;

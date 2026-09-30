@@ -114,10 +114,7 @@ export const bg = {
     bookingLink: 'Мнения в Booking.com',
     airbnbLink: 'Мнения в Airbnb',
   },
-  policies: {
-    draftNotice:
-      'Този документ съдържа полета за данните на оператора и контакт. Попълнете ги преди публичното представяне на сайта.',
-  },
+  policies: {},
   home: {
     brand: 'Гнездото',
     eyebrow: 'Лозенец',
