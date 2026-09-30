@@ -5,7 +5,6 @@ Last updated: 30 September 2026
 These policies cover stays at The Nest Bungalows / Бунгала „Гнездото“ in Lozenets, Bulgaria.
 
 Accommodation operator: **Vasil Syakolov**  
-UIC/BULSTAT, if applicable: **Not applicable (no UIC/BULSTAT)**  
 Correspondence address: **12 Osogovo Street, 8277 Lozenets, Bulgaria**  
 Email: **gnezdoto.lozenets@gmail.com**  
 Phone: **+359877116050**  
