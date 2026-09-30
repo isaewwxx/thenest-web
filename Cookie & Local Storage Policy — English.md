@@ -22,6 +22,10 @@ Other browser storage, including local storage and session storage, can hold set
 
 We use neither advertising cookies nor website information for behavioural advertising. The website currently has no separate marketing or advertising tracking system.
 
+## Consent choices
+
+The cookie settings panel offers three choices: **Accept all** allows the embedded Google Maps view to load; **Necessary only** and **Reject all** keep that optional embed disabled. Your choice is saved in browser local storage so the panel does not reappear on each visit. You can reopen it from **Cookie settings** in the footer.
+
 ## Necessary technologies
 
 The site uses limited technical storage where needed to secure and operate its forms. Where a technology is strictly necessary to provide a service you request, we may use it without prior consent to the extent allowed by law.
@@ -36,7 +40,7 @@ Cloudflare states that Turnstile does not access the content entered by users in
 
 ## Google Maps
 
-The location page includes a Google Maps map that loads lazily. When your browser loads it, it connects to Google's servers. Google may process technical information and use its own cookies or similar technologies under its policies. You can use the rest of the website without loading the map.
+The location page offers an embedded Google Maps map. It remains unloaded unless you choose **Accept all**; after consent it loads lazily as it approaches the viewport. When loaded, your browser connects to Google's servers. Google may process technical information and use its own cookies or similar technologies under its policies. You can use the rest of the website without loading the map or open Google Maps through the external link.
 
 ## Enquiry confirmation
 

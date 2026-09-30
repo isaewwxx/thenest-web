@@ -1,0 +1,268 @@
+---
+import type { Locale } from '../data/types';
+import { pathFor } from '../lib/routes';
+import type { Translation } from '../i18n/bg';
+
+interface Props {
+  locale: Locale;
+  copy: Translation;
+}
+
+const { locale, copy } = Astro.props;
+const consent = copy.cookieConsent;
+---
+---
+
+<aside
+  class="cookie-consent"
+  data-cookie-banner
+  hidden
+  role="dialog"
+  aria-modal="false"
+  aria-labelledby="cookie-consent-title"
+>
+  <div class="cookie-consent-inner">
+    <div class="cookie-consent-copy">
+      <h2 id="cookie-consent-title">{consent.title}</h2>
+      <p>{consent.description}</p>
+      <a href={pathFor('cookies', locale)}>{consent.policyLink}</a>
+    </div>
+    <div class="cookie-consent-actions">
+      <button type="button" class="cookie-accept" data-cookie-choice="all">
+        {consent.acceptAll}
+      </button>
+      <button type="button" data-cookie-choice="necessary">
+        {consent.necessaryOnly}
+      </button>
+      <button type="button" data-cookie-choice="rejected">
+        {consent.rejectAll}
+      </button>
+    </div>
+  </div>
+</aside>
+
+<script is:inline>
+  (() => {
+    const storageKey = 'nest-cookie-choice-v1';
+    const banner = document.querySelector('[data-cookie-banner]');
+    if (!banner) return;
+
+    const validChoices = new Set(['all', 'necessary', 'rejected']);
+    let choice = null;
+    let returnFocus = null;
+
+    try {
+      const savedChoice = localStorage.getItem(storageKey);
+      choice = validChoices.has(savedChoice) ? savedChoice : null;
+    } catch {
+      choice = null;
+    }
+
+    const mapFrames = () => document.querySelectorAll('[data-map-frame]');
+
+    const loadMap = (frame) => {
+      if (choice !== 'all' || frame.querySelector('iframe')) return;
+      const src = frame.dataset.mapSrc;
+      if (!src) return;
+
+      const iframe = document.createElement('iframe');
+      iframe.src = src;
+      iframe.title = frame.dataset.mapTitle || 'Google Maps location';
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.allowFullscreen = true;
+      iframe.allow = 'fullscreen';
+      frame.querySelector('[data-map-placeholder]')?.setAttribute('hidden', '');
+      frame.append(iframe);
+      frame.dataset.mapLoaded = 'true';
+    };
+
+    let mapObserver = null;
+    if ('IntersectionObserver' in window) {
+      mapObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            mapObserver.unobserve(entry.target);
+            entry.target.dataset.mapObserving = 'false';
+            loadMap(entry.target);
+          });
+        }, { rootMargin: '240px 0px' });
+    }
+
+    const updateMaps = () => {
+      mapFrames().forEach((frame) => {
+        const placeholder = frame.querySelector('[data-map-placeholder]');
+        if (choice !== 'all') {
+          mapObserver?.unobserve(frame);
+          frame.dataset.mapObserving = 'false';
+          frame.querySelector('iframe')?.remove();
+          delete frame.dataset.mapLoaded;
+          if (placeholder) placeholder.hidden = false;
+          return;
+        }
+
+        if (frame.dataset.mapLoaded === 'true') return;
+        if (mapObserver) {
+          if (frame.dataset.mapObserving !== 'true') {
+            frame.dataset.mapObserving = 'true';
+            mapObserver.observe(frame);
+          }
+        } else {
+          loadMap(frame);
+        }
+      });
+    };
+
+    const saveChoice = (nextChoice) => {
+      if (!validChoices.has(nextChoice)) return;
+      choice = nextChoice;
+      document.documentElement.dataset.cookieConsent = nextChoice;
+      try {
+        localStorage.setItem(storageKey, nextChoice);
+      } catch {
+        // Keep the choice for this page view if browser storage is unavailable.
+      }
+      banner.hidden = true;
+      updateMaps();
+      window.dispatchEvent(
+        new CustomEvent('nest:cookie-consent-change', {
+          detail: { choice: nextChoice },
+        }),
+      );
+      returnFocus?.focus();
+      returnFocus = null;
+    };
+
+    document.addEventListener('click', (event) => {
+      if (!(event.target instanceof Element)) return;
+      const preferences = event.target.closest('[data-cookie-preferences]');
+      if (preferences) {
+        event.preventDefault();
+        returnFocus = preferences;
+        banner.hidden = false;
+        banner.querySelector('button')?.focus();
+        return;
+      }
+
+      const choiceButton = event.target.closest('[data-cookie-choice]');
+      if (choiceButton) saveChoice(choiceButton.dataset.cookieChoice);
+    });
+
+    if (choice) {
+      document.documentElement.dataset.cookieConsent = choice;
+      updateMaps();
+    } else {
+      document.documentElement.dataset.cookieConsent = 'unset';
+      banner.hidden = false;
+    }
+  })();
+</script>
+
+<style>
+  .cookie-consent[hidden] {
+    display: none;
+  }
+
+  .cookie-consent {
+    position: fixed;
+    z-index: 90;
+    inset-inline: 0;
+    bottom: 0;
+    padding: 1rem var(--page-gutter)
+      calc(1rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: 0 -12px 36px rgb(26 36 32 / 12%);
+    color: var(--ink);
+  }
+
+  .cookie-consent-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem clamp(1.5rem, 4vw, 3.5rem);
+    width: min(var(--container-max), 100%);
+    margin-inline: auto;
+  }
+
+  .cookie-consent-copy {
+    max-width: 58ch;
+  }
+
+  .cookie-consent-copy h2 {
+    margin: 0 0 0.3rem;
+    color: var(--forest);
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+  }
+
+  .cookie-consent-copy p {
+    margin: 0 0 0.35rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  .cookie-consent-copy a {
+    color: var(--forest);
+    font-size: 0.84rem;
+    text-underline-offset: 0.15em;
+  }
+
+  .cookie-consent-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .cookie-consent-actions button {
+    min-height: 2.65rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--forest-dark);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.86rem;
+    font-weight: 650;
+    line-height: 1.2;
+  }
+
+  .cookie-consent-actions button:hover {
+    background: var(--paper-deep);
+  }
+
+  .cookie-consent-actions .cookie-accept {
+    border-color: var(--forest);
+    background: var(--forest);
+    color: white;
+  }
+
+  .cookie-consent-actions .cookie-accept:hover {
+    background: var(--forest-dark);
+  }
+
+  @media (max-width: 760px) {
+    .cookie-consent {
+      max-height: min(72dvh, 24rem);
+      overflow-y: auto;
+    }
+
+    .cookie-consent-inner {
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+
+    .cookie-consent-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .cookie-consent-actions .cookie-accept {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

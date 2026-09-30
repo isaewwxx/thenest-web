@@ -11,12 +11,16 @@ const copy =
   locale === 'bg'
     ? {
         title: 'Карта с местоположението на Бунгала Гнездото',
-        disclosure: 'Зареждането на картата свързва браузъра ви с Google Maps.',
+        disclosure: 'Картата се зарежда след съгласие за външно съдържание и свързва браузъра ви с Google Maps.',
+        consent: 'За да видите вградената карта, изберете „Приеми всички“ или променете настройките за бисквитки.',
+        settings: 'Настройки за бисквитки',
         open: 'Отвори в Google Maps',
       }
     : {
         title: 'Map showing the location of The Nest Bungalows',
-        disclosure: 'Loading the map connects your browser to Google Maps.',
+        disclosure: 'The map loads after you allow external content and connects your browser to Google Maps.',
+        consent: 'To view the embedded map, choose “Accept all” or change your cookie settings.',
+        settings: 'Cookie settings',
         open: 'Open in Google Maps',
       };
 
@@ -26,15 +30,11 @@ const embedUrl =
 
 <section class="location-map" data-google-map>
   <p class="map-disclosure">{copy.disclosure}</p>
-  <div class="map-frame">
-    <iframe
-      src={embedUrl}
-      title={copy.title}
-      loading="lazy"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allowfullscreen
-      allow="fullscreen"
-    ></iframe>
+  <div class="map-frame" data-map-frame data-map-src={embedUrl} data-map-title={copy.title}>
+    <div class="map-placeholder" data-map-placeholder>
+      <p>{copy.consent}</p>
+      <button type="button" data-cookie-preferences>{copy.settings}</button>
+    </div>
   </div>
   {externalMapUrl && (
     <a
@@ -81,6 +81,37 @@ const embedUrl =
     height: 100%;
     border: 0;
     border-radius: inherit;
+  }
+
+  .map-placeholder {
+    display: grid;
+    min-height: 100%;
+    place-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: clamp(1rem, 4vw, 2rem);
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .map-placeholder p {
+    max-width: 38ch;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .map-placeholder button {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--forest);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
   }
 
   .map-external-link {

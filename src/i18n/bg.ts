@@ -391,6 +391,7 @@ export const bg = {
     copyright: 'Всички права запазени.',
     privacy: 'Политика за поверителност',
     cookies: 'Бисквитки и съхранение',
+    cookieSettings: 'Настройки за бисквитки',
     bookingTerms: 'Условия за резервация',
     houseRules: 'Правила за престой',
     legalHeading: 'Политики и условия',
@@ -400,6 +401,14 @@ export const bg = {
     navAria: 'Долна навигация',
     platformsHeading: 'Платформи и общност',
     langSwitchLabel: 'English version',
+  },
+  cookieConsent: {
+    title: 'Вашите настройки за бисквитки',
+    description: 'Използваме необходимите технологии за работа и сигурност на формулярите. Вградената карта Google Maps се зарежда само ако приемете всички бисквитки.',
+    policyLink: 'Научете повече в политиката за бисквитки',
+    acceptAll: 'Приеми всички',
+    necessaryOnly: 'Само необходимите',
+    rejectAll: 'Откажи всички',
   },
   notFound: {
     title: 'Тази пътека не води никъде.',

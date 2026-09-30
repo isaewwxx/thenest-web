@@ -385,6 +385,7 @@ export const en: Translation = {
     copyright: 'All rights reserved.',
     privacy: 'Privacy Policy',
     cookies: 'Cookies & storage',
+    cookieSettings: 'Cookie settings',
     bookingTerms: 'Booking terms',
     houseRules: 'House rules',
     legalHeading: 'Policies & terms',
@@ -394,6 +395,14 @@ export const en: Translation = {
     navAria: 'Footer navigation',
     platformsHeading: 'Platforms & Social',
     langSwitchLabel: 'Българска версия',
+  },
+  cookieConsent: {
+    title: 'Your cookie settings',
+    description: 'We use necessary technologies to run the site and secure forms. The embedded Google Maps view loads only if you accept all cookies.',
+    policyLink: 'Read our cookie policy',
+    acceptAll: 'Accept all',
+    necessaryOnly: 'Necessary only',
+    rejectAll: 'Reject all',
   },
   notFound: {
     title: 'This path leads nowhere.',

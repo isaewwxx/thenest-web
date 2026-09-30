@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileBottomBar from '../components/MobileBottomBar.astro';
+import CookieConsent from '../components/CookieConsent.astro';
 import { t } from '../i18n';
 import type { PageKey } from '../lib/routes';
 import { seoFor, siteOrigin } from '../lib/content';
@@ -65,5 +66,6 @@ const seo = seoFor(
     </main>
     <Footer locale={locale} page={page} copy={copy} />
     <MobileBottomBar locale={locale} page={page} copy={copy} />
+    <CookieConsent locale={locale} copy={copy} />
   </body>
 </html>
