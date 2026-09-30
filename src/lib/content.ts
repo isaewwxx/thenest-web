@@ -102,10 +102,11 @@ export function seoFor(
   origin: string | null,
   indexable: boolean,
 ) {
+  const canIndex = Boolean(origin && indexable);
   return {
-    canonical: origin ? `${origin}${pathFor(page, locale)}` : null,
-    bg: origin ? `${origin}${pathFor(page, 'bg')}` : null,
-    en: origin ? `${origin}${pathFor(page, 'en')}` : null,
-    indexable: Boolean(origin && indexable),
+    canonical: canIndex ? `${origin}${pathFor(page, locale)}` : null,
+    bg: canIndex ? `${origin}${pathFor(page, 'bg')}` : null,
+    en: canIndex ? `${origin}${pathFor(page, 'en')}` : null,
+    indexable: canIndex,
   };
 }

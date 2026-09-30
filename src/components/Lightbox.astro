@@ -6,9 +6,14 @@ import { X, ChevronLeft, ChevronRight } from '@lucide/astro';
 const { locale, copy } = Astro.props as { locale: Locale; copy: Translation };
 ---
 
-<dialog class="lightbox" aria-label={copy.nav.gallery} data-locale={locale}>
+<dialog
+  class="lightbox"
+  aria-label={copy.nav.gallery}
+  aria-modal="true"
+  data-locale={locale}
+>
   <div class="lightbox-header">
-    <span class="lightbox-counter" aria-live="polite"></span>
+    <span class="lightbox-counter" aria-live="polite" aria-atomic="true"></span>
     <button class="lightbox-close" type="button" aria-label={copy.ui.close}>
       <X size={20} stroke-width={2.2} aria-hidden="true" />
     </button>
@@ -30,29 +35,25 @@ const { locale, copy } = Astro.props as { locale: Locale; copy: Translation };
   const image = dialog?.querySelector('img');
   const caption = dialog?.querySelector('figcaption');
   const counter = dialog?.querySelector('.lightbox-counter');
-  let lastFocusedTrigger = null;
+  let returnFocusTo = null;
+  let activeHref = null;
   let activeIndex = 0;
 
   function getVisibleItems() {
-    const all = Array.from(document.querySelectorAll('a[data-lightbox]'));
-    const visible = all.filter((a) => {
-      const parent = a.closest('.gallery-item');
-      return !parent || parent.style.display !== 'none';
-    });
-    return visible.length > 0 ? visible : all;
-  }
-
-  function updateCounter(currentIdx, total) {
-    if (!counter) return;
-    counter.textContent = `${currentIdx + 1} / ${total}`;
+    return Array.from(document.querySelectorAll('a[data-lightbox]')).filter(
+      (anchor) => {
+        const item = anchor.closest('.gallery-item');
+        return !item || window.getComputedStyle(item).display !== 'none';
+      },
+    );
   }
 
   function preloadAdjacent(currentIdx, items) {
-    if (!items || items.length <= 1) return;
+    if (items.length <= 1) return;
     const nextIdx = (currentIdx + 1) % items.length;
     const prevIdx = (currentIdx - 1 + items.length) % items.length;
     [nextIdx, prevIdx].forEach((idx) => {
-      const src = items[idx]?.getAttribute('href');
+      const src = items[idx]?.href;
       if (src) {
         const preloader = new Image();
         preloader.src = src;
@@ -60,30 +61,52 @@ const { locale, copy } = Astro.props as { locale: Locale; copy: Translation };
     });
   }
 
-  function show(i) {
-    if (!dialog || !image) return;
-    const items = getVisibleItems();
-    if (!items.length) return;
-    activeIndex = (i + items.length) % items.length;
-    const a = items[activeIndex];
-    image.src = a.href;
-    image.alt = a.dataset.alt || '';
-    if (caption) caption.textContent = a.dataset.caption || '';
-    updateCounter(activeIndex, items.length);
+  function show(index, items = getVisibleItems(), trigger = null) {
+    if (!dialog || !image || items.length === 0) return;
+    activeIndex = (index + items.length) % items.length;
+    const anchor = items[activeIndex];
+    activeHref = anchor.href;
+    image.src = activeHref;
+    image.alt = anchor.dataset.alt || '';
+    if (caption) caption.textContent = anchor.dataset.caption || '';
+    if (counter) counter.textContent = `${activeIndex + 1} / ${items.length}`;
+
     if (!dialog.open) {
-      lastFocusedTrigger = document.activeElement;
+      returnFocusTo = trigger || document.activeElement;
       dialog.showModal();
       dialog.querySelector('.lightbox-close')?.focus();
     }
     preloadAdjacent(activeIndex, items);
   }
 
-  document.querySelectorAll('a[data-lightbox]').forEach((a) => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
+  function navigate(offset) {
+    const items = getVisibleItems();
+    if (!items.length) {
+      if (dialog?.open) dialog.close();
+      return;
+    }
+    const currentIndex = items.findIndex(
+      (anchor) => anchor.href === activeHref,
+    );
+    show((currentIndex < 0 ? 0 : currentIndex) + offset, items);
+  }
+
+  document.querySelectorAll('a[data-lightbox]').forEach((anchor) => {
+    anchor.addEventListener('click', (event) => {
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
       const items = getVisibleItems();
-      const idx = items.indexOf(a);
-      show(idx >= 0 ? idx : 0);
+      const index = items.indexOf(anchor);
+      if (index < 0 || !dialog || !image) return;
+      event.preventDefault();
+      show(index, items, anchor);
     });
   });
 
@@ -92,64 +115,91 @@ const { locale, copy } = Astro.props as { locale: Locale; copy: Translation };
     ?.addEventListener('click', () => dialog.close());
   dialog
     ?.querySelector('.lightbox-prev')
-    ?.addEventListener('click', () => show(activeIndex - 1));
+    ?.addEventListener('click', () => navigate(-1));
   dialog
     ?.querySelector('.lightbox-next')
-    ?.addEventListener('click', () => show(activeIndex + 1));
+    ?.addEventListener('click', () => navigate(1));
 
-  dialog?.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') show(activeIndex + 1);
-    if (e.key === 'ArrowLeft') show(activeIndex - 1);
-  });
-
-  dialog?.addEventListener('click', (e) => {
-    if (e.target === dialog) dialog.close();
-  });
-
-  dialog?.addEventListener('close', () => {
-    if (lastFocusedTrigger && typeof lastFocusedTrigger.focus === 'function') {
-      lastFocusedTrigger.focus();
+  dialog?.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      navigate(1);
+    }
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      navigate(-1);
     }
   });
 
-  // Mobile touch swipe gestures
+  dialog?.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+
+  dialog?.addEventListener('close', () => {
+    if (returnFocusTo && typeof returnFocusTo.focus === 'function') {
+      returnFocusTo.focus();
+    }
+    activeHref = null;
+  });
+
   let touchStartX = 0;
   let touchStartY = 0;
+  let swipeStartedOnImage = false;
   dialog?.addEventListener(
     'touchstart',
-    (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchStartY = e.changedTouches[0].screenY;
+    (event) => {
+      swipeStartedOnImage = Boolean(event.target.closest('figure'));
+      touchStartX = event.changedTouches[0].clientX;
+      touchStartY = event.changedTouches[0].clientY;
     },
     { passive: true },
   );
 
   dialog?.addEventListener(
     'touchend',
-    (e) => {
-      const diffX = e.changedTouches[0].screenX - touchStartX;
-      const diffY = e.changedTouches[0].screenY - touchStartY;
-      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX < 0) {
-          show(activeIndex + 1);
-        } else {
-          show(activeIndex - 1);
-        }
+    (event) => {
+      const diffX = event.changedTouches[0].clientX - touchStartX;
+      const diffY = event.changedTouches[0].clientY - touchStartY;
+      if (
+        swipeStartedOnImage &&
+        Math.abs(diffX) > 40 &&
+        Math.abs(diffX) > Math.abs(diffY)
+      ) {
+        navigate(diffX < 0 ? 1 : -1);
       }
+      swipeStartedOnImage = false;
     },
     { passive: true },
   );
 </script>
 
 <style>
-  .lightbox {
-    width: min(94vw, 1100px);
-    max-height: 94vh;
-    padding: 1rem;
+  .lightbox:not([open]) {
+    display: none;
+  }
+
+  .lightbox[open] {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-areas:
+      'header header header'
+      'previous figure next';
+    grid-template-columns: minmax(44px, 64px) minmax(0, 1fr) minmax(44px, 64px);
+    grid-template-rows: 48px minmax(0, 1fr);
+    gap: 0.75rem 1rem;
+    width: min(96vw, 1800px);
+    height: min(94dvh, 980px);
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: max(0.75rem, env(safe-area-inset-top))
+      max(1rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom))
+      max(1rem, env(safe-area-inset-left));
+    border: 1px solid var(--line);
     border-radius: var(--radius-lg, 12px);
     background: var(--paper);
     color: var(--ink);
-    border: 1px solid var(--line);
     box-shadow: 0 24px 60px rgba(10, 20, 14, 0.45);
     overflow: hidden;
   }
@@ -161,152 +211,154 @@ const { locale, copy } = Astro.props as { locale: Locale; copy: Translation };
   }
 
   .lightbox-header {
-    position: absolute;
-    top: 0.75rem;
-    left: 0.75rem;
-    right: 0.75rem;
+    grid-area: header;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    z-index: 10;
-    pointer-events: none;
-  }
-
-  .lightbox-header > * {
-    pointer-events: auto;
+    min-width: 0;
   }
 
   .lightbox-counter {
     display: inline-flex;
     align-items: center;
-    padding: 0.4rem 0.85rem;
+    min-height: 36px;
+    padding: 0 0.85rem;
+    border: 1px solid var(--line);
     border-radius: var(--radius-sm, 4px);
-    background: rgba(14, 26, 19, 0.82);
-    color: #f7f5ed;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: var(--paper-deep);
+    color: var(--ink);
     font-size: 0.82rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
   }
 
   .lightbox figure {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 2.75rem 0.5rem 0.75rem;
-  }
-
-  @media (min-width: 640px) {
-    .lightbox figure {
-      margin: 2.75rem 1.75rem 1rem;
-    }
+    grid-area: figure;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
   }
 
   .lightbox img {
+    display: block;
+    min-width: 0;
+    min-height: 0;
     max-width: 100%;
-    max-height: 72vh;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    justify-self: center;
+    align-self: center;
     object-fit: contain;
     border-radius: 4px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
   }
 
   .lightbox figcaption {
+    max-width: 64ch;
+    justify-self: center;
+    margin-top: 0.65rem;
     color: var(--muted);
-    margin-top: 0.75rem;
     font-size: 0.9rem;
     font-weight: 500;
+    line-height: 1.4;
     text-align: center;
-    max-width: 60ch;
   }
 
   .lightbox button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    min-width: 44px;
-    min-height: 44px;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    align-self: center;
+    border: 1px solid var(--line);
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(14, 26, 19, 0.75);
+    background: var(--forest);
     color: #f7f5ed;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
     transition:
       background 0.2s ease,
       transform 0.15s ease,
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
+      border-color 0.2s ease;
   }
 
   .lightbox button:hover {
-    background: rgba(22, 44, 32, 0.95);
-    border-color: rgba(255, 255, 255, 0.4);
-    transform: scale(1.05);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    border-color: var(--forest);
+    background: var(--forest-dark, #14261b);
+    transform: scale(1.04);
   }
 
   .lightbox button:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 
   .lightbox button:focus-visible {
-    outline: 2px solid #c9db9d;
-    outline-offset: 2px;
-  }
-
-  .lightbox-prev,
-  .lightbox-next {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
+    outline: 2px solid var(--sea);
+    outline-offset: 3px;
   }
 
   .lightbox-prev {
-    left: 0.75rem;
+    grid-area: previous;
+    justify-self: center;
   }
 
   .lightbox-next {
-    right: 0.75rem;
+    grid-area: next;
+    justify-self: center;
   }
 
-  .lightbox-prev:hover {
-    transform: translateY(-50%) scale(1.05);
-  }
-
-  .lightbox-next:hover {
-    transform: translateY(-50%) scale(1.05);
-  }
-
-  .lightbox-prev:active,
-  .lightbox-next:active {
-    transform: translateY(-50%) scale(0.95);
+  .lightbox-close {
+    flex: 0 0 auto;
   }
 
   @media (max-width: 600px) {
-    .lightbox {
-      width: 96vw;
-      padding: 0.5rem;
+    .lightbox[open] {
+      grid-template-areas:
+        'header header'
+        'figure figure'
+        'previous next';
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: 44px minmax(0, 1fr) 52px;
+      gap: 0.5rem;
+      width: 100vw;
+      height: 100dvh;
+      padding: max(0.5rem, env(safe-area-inset-top))
+        max(0.75rem, env(safe-area-inset-right))
+        max(0.5rem, env(safe-area-inset-bottom))
+        max(0.75rem, env(safe-area-inset-left));
+      border: 0;
+      border-radius: 0;
+      border-color: transparent;
+      background: #0e1a13;
+      color: #f7f5ed;
     }
-    .lightbox figure {
-      margin: 2.75rem 0.25rem 0.5rem;
-    }
-    .lightbox img {
-      max-height: 65vh;
-    }
-    .lightbox-prev {
-      left: 0.35rem;
-    }
-    .lightbox-next {
-      right: 0.35rem;
-    }
+
     .lightbox button {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .lightbox-counter {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+      color: #f7f5ed;
+    }
+
+    .lightbox figcaption {
+      color: rgba(247, 245, 237, 0.78);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lightbox button {
+      transition: none;
     }
   }
 </style>

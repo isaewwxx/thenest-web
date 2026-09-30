@@ -78,7 +78,7 @@ function iconFor(id: string) {
 {units.length ? (
   <div class="units-container">
     {units.map((unit) => {
-      const bookingUrl = `${pathFor('booking', locale)}?room=${encodeURIComponent(unit.id)}`;
+      const bookingUrl = pathFor('booking', locale);
       const photo = unitPhoto(unit);
       return (
         <article class="unit-feature">

@@ -1,129 +1,224 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 
-test.describe('Direct booking enquiry flow', () => {
-  test('submits a valid direct booking enquiry and displays success state in Bulgarian', async ({
+async function acceptEnquiry(page: Page) {
+  await page.route('**/api/booking', async (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, message: 'Enquiry accepted.' }),
+    }),
+  );
+}
+
+test.describe('Direct enquiry form', () => {
+  test('submits the short Bulgarian stay enquiry and keeps optional fields optional', async ({
+    page,
+  }) => {
+    let submitted: Record<string, unknown> | undefined;
+    await page.route('**/api/booking', async (route) => {
+      submitted = route.request().postDataJSON();
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, message: 'Enquiry accepted.' }),
+      });
+    });
+
+    await page.goto('/booking');
+    await page.fill('#checkIn', '2027-07-15');
+    await page.fill('#checkOut', '2027-07-20');
+    await page.fill('#guests', '2');
+    await page.fill('#name', 'Димитър Димитров');
+    await page.fill('#email', 'dimitar@example.com');
+    await page.fill('#accommodationPreference', 'Тиха част на двора');
+    await page.fill('#message', 'Моля за информация за пристигането.');
+    await page.locator('#privacyAcknowledged').check();
+
+    await expect(page.locator('#phone')).not.toHaveAttribute('required', '');
+    await expect(page.locator('#accommodationPreference')).toHaveAttribute(
+      'aria-describedby',
+      'accommodationPreference-error',
+    );
+    await expect(page.locator('#accommodationId, #rooms, #pets')).toHaveCount(
+      0,
+    );
+    await page.getByRole('button', { name: 'Изпрати запитване' }).click();
+
+    const success = page.locator('#booking-success');
+    await expect(success).toBeVisible();
+    await expect(success).toContainText(/получихме запитването/i);
+    expect(submitted).toMatchObject({
+      intent: 'stay',
+      checkIn: '2027-07-15',
+      checkOut: '2027-07-20',
+      guests: 2,
+      accommodationPreference: 'Тиха част на двора',
+      phone: '',
+      privacyAcknowledged: 'true',
+    });
+    expect(submitted).not.toHaveProperty('accommodationId');
+    expect(submitted).not.toHaveProperty('rooms');
+    expect(submitted).not.toHaveProperty('pets');
+  });
+
+  test('supports a general English question without dates, guests or phone', async ({
+    page,
+  }) => {
+    await acceptEnquiry(page);
+    await page.goto('/en/booking');
+    await page.getByLabel('General question').check();
+    await expect(page.locator('#stay-fields')).toBeHidden();
+    await page.fill('#name', 'Sarah Jenkins');
+    await page.fill('#email', 'sarah@example.co.uk');
+    await page.fill('#message', 'Can we arrive after 21:00?');
+    await page.locator('#privacyAcknowledged').check();
+    await page.getByRole('button', { name: 'Send message' }).click();
+    await expect(page.locator('#booking-success')).toBeVisible();
+    await expect(page.locator('#booking-success')).toContainText(/received/i);
+  });
+
+  test('requires a question and marks the selected dates as preferences', async ({
     page,
   }) => {
     await page.goto('/booking');
+    await expect(page.locator('label[for="checkIn"]')).toContainText(
+      'Предпочитана дата на пристигане',
+    );
+    await expect(page.locator('label[for="checkOut"]')).toContainText(
+      'Предпочитана дата на отпътуване',
+    );
+    await page.getByLabel('Общ въпрос').check();
+    await page.fill('#name', 'Мария Петрова');
+    await page.fill('#email', 'maria@example.com');
+    await page.locator('#privacyAcknowledged').check();
+    await page.getByRole('button', { name: 'Изпрати съобщение' }).click();
+    await expect(page.locator('#message-error')).toBeVisible();
+    await expect(page.locator('#booking-success')).toBeHidden();
+  });
 
-    await expect(page.locator('main h1')).toContainText(/пишете/i);
+  test('shows an error and preserves entered values after a delivery failure', async ({
+    page,
+  }) => {
+    await page.route('**/api/booking', async (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false, message: 'Please retry later.' }),
+      }),
+    );
+    await page.goto('/en/booking');
+    await page.fill('#checkIn', '2027-08-01');
+    await page.fill('#checkOut', '2027-08-04');
+    await page.fill('#guests', '4');
+    await page.fill('#name', 'Casey Guest');
+    await page.fill('#email', 'casey@example.com');
+    await page.locator('#privacyAcknowledged').check();
+    await page.getByRole('button', { name: 'Request a stay' }).click();
+
+    await expect(page.locator('#form-error-alert')).toBeVisible();
     await expect(page.locator('#booking-form')).toBeVisible();
+    await expect(page.locator('#checkIn')).toHaveValue('2027-08-01');
+    await expect(page.locator('#checkOut')).toHaveValue('2027-08-04');
+    await expect(page.locator('#name')).toHaveValue('Casey Guest');
+  });
 
-    // Fill in required form fields
+  test('prevents a second submission while the first is pending', async ({
+    page,
+  }) => {
+    let requestCount = 0;
+    await page.route('**/api/booking', async (route) => {
+      requestCount += 1;
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      });
+    });
+    await page.goto('/en/booking');
+    await page.fill('#checkIn', '2027-09-01');
+    await page.fill('#checkOut', '2027-09-03');
+    await page.fill('#guests', '2');
+    await page.fill('#name', 'Casey Guest');
+    await page.fill('#email', 'casey@example.com');
+    await page.locator('#privacyAcknowledged').check();
+    const submit = page.locator('#submit-btn');
+    await submit.click();
+    await expect(submit).toBeDisabled();
+    await expect(page.locator('#booking-success')).toBeVisible();
+    expect(requestCount).toBe(1);
+  });
+
+  test('sets the departure minimum after arrival and validates required fields', async ({
+    page,
+  }) => {
+    await page.goto('/booking');
+    await expect(page.locator('#phone')).not.toHaveAttribute('required', '');
+    await page.fill('#checkIn', '2027-07-01');
+    await expect(page.locator('#checkOut')).toHaveAttribute(
+      'min',
+      '2027-07-02',
+    );
+    await page.getByRole('button', { name: 'Изпрати запитване' }).click();
+    await expect(page.locator('#name-error')).toBeVisible();
+    await expect(page.locator('#booking-success')).toBeHidden();
+  });
+
+  test('requires a privacy acknowledgement and links the localized policy', async ({
+    page,
+  }) => {
+    let requestCount = 0;
+    await page.route('**/api/booking', async (route) => {
+      requestCount += 1;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true, message: 'Enquiry accepted.' }),
+      });
+    });
+    await page.goto('/booking');
     await page.fill('#checkIn', '2027-07-15');
     await page.fill('#checkOut', '2027-07-20');
-    await page.selectOption('#guests', '2');
     await page.fill('#name', 'Димитър Димитров');
-    await page.fill('#phone', '+359 888 777 666');
     await page.fill('#email', 'dimitar@example.com');
-    await page.fill('#message', 'Моля за тиха стая с изглед към градината.');
-
-    // Submit form
-    await page.click('#submit-btn');
-
-    // Expect success message to be displayed and form to be hidden
-    const successView = page.locator('#booking-success');
-    await expect(successView).toBeVisible({ timeout: 10_000 });
-    await expect(successView.locator('h3')).toContainText(/изпратено/i);
-    await expect(page.locator('#booking-form')).not.toBeVisible();
-    await expect(successView.locator('a[href^="tel:"]')).toBeVisible();
-  });
-
-  test('submits a valid direct booking enquiry in English', async ({
-    page,
-  }) => {
-    await page.goto('/en/booking');
-
-    await expect(page.locator('main h1')).toContainText(/stay/i);
-    await expect(page.locator('#booking-form')).toBeVisible();
-
-    // Fill form
-    await page.fill('#checkIn', '2027-08-01');
-    await page.fill('#checkOut', '2027-08-07');
-    await page.selectOption('#guests', '3');
-    await page.fill('#name', 'Sarah Jenkins');
-    await page.fill('#phone', '+44 7700 900077');
-    await page.fill('#email', 'sarah@example.co.uk');
-    await page.fill('#message', 'Traveling with small child.');
-
-    await page.click('#submit-btn');
-
-    const successView = page.locator('#booking-success');
-    await expect(successView).toBeVisible({ timeout: 10_000 });
-    await expect(successView.locator('h3')).toContainText(
-      /enquiry has been sent/i,
+    await expect(page.locator('#privacyAcknowledged')).toHaveAttribute(
+      'required',
+      '',
     );
+    await expect(
+      page
+        .locator('#booking-form')
+        .getByRole('link', { name: 'Политика за поверителност' }),
+    ).toHaveAttribute('href', '/privacy');
+
+    await page.getByRole('button', { name: 'Изпрати запитване' }).click();
+    await expect(page.locator('#privacyAcknowledged-error')).toBeVisible();
+    expect(requestCount).toBe(0);
+
+    await page.locator('#privacyAcknowledged').check();
+    await page.getByRole('button', { name: 'Изпрати запитване' }).click();
+    await expect(page.locator('#booking-success')).toBeVisible();
+    expect(requestCount).toBe(1);
   });
 
-  test('preselects accommodation when entering via ?room= query param', async ({
-    page,
-  }) => {
-    await page.goto('/booking?room=bungalow-room');
-    const select = page.locator('#accommodationId');
-    await expect(select).toHaveValue('bungalow-room');
-  });
-
-  test('preselects accommodation when entering via ?unit= fallback query param', async ({
-    page,
-  }) => {
-    await page.goto('/booking?unit=bungalow-room');
-    const select = page.locator('#accommodationId');
-    await expect(select).toHaveValue('bungalow-room');
-  });
-
-  test('accommodation card enquire CTA links to booking with ?room= parameter', async ({
+  test('accommodation enquiry links no longer preselect an unverified unit', async ({
     page,
   }) => {
     await page.goto('/accommodation');
-    const enquireBtn = page.locator('.unit-enquire-btn').first();
-    await expect(enquireBtn).toHaveAttribute(
-      'href',
-      /\/booking\?room=bungalow-room/,
-    );
-    await enquireBtn.click();
-    await expect(page).toHaveURL(/\/booking\?room=bungalow-room/);
-    const select = page.locator('#accommodationId');
-    await expect(select).toHaveValue('bungalow-room');
+    const enquiry = page.locator('.unit-enquire-btn').first();
+    await expect(enquiry).toHaveAttribute('href', '/booking');
+    await enquiry.click();
+    await expect(page).toHaveURL(/\/booking$/);
+    await expect(page.locator('#accommodationId, #rooms')).toHaveCount(0);
   });
 
-  test('preselects rooms when entering via query param', async ({ page }) => {
-    await page.goto('/booking?rooms=3');
-    const roomsSelect = page.locator('#rooms');
-    await expect(roomsSelect).toHaveValue('3');
-  });
-
-  test('submits direct enquiry with specific room count', async ({ page }) => {
-    await page.goto('/booking');
-    await page.fill('#checkIn', '2027-07-01');
-    await page.fill('#checkOut', '2027-07-06');
-    await page.selectOption('#guests', '4');
-    await page.selectOption('#rooms', '2');
-    await page.fill('#name', 'Мария Петрова');
-    await page.fill('#phone', '+359 888 112 233');
-    await page.fill('#email', 'maria@example.com');
-    await page.click('#submit-btn');
-
-    const successView = page.locator('#booking-success');
-    await expect(successView).toBeVisible({ timeout: 10_000 });
-  });
-
-  test('footer language switch preserves current page', async ({ page }) => {
+  test('footer language switch preserves the current page', async ({
+    page,
+  }) => {
     await page.goto('/booking');
     const footerLink = page.locator('footer a:has-text("English")');
     await expect(footerLink).toHaveAttribute('href', '/en/booking');
     await footerLink.click();
-    expect(new URL(page.url()).pathname).toBe('/en/booking');
-  });
-
-  test('validates required fields on client side and prevents submission with empty inputs', async ({
-    page,
-  }) => {
-    await page.goto('/booking');
-    await page.click('#submit-btn');
-
-    // Expect error messages to appear
-    await expect(page.locator('#checkIn-error')).toBeVisible();
-    await expect(page.locator('#booking-form')).toBeVisible();
-    await expect(page.locator('#booking-success')).not.toBeVisible();
+    await expect(page).toHaveURL(/\/en\/booking$/);
   });
 });

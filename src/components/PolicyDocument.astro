@@ -1,0 +1,146 @@
+---
+import type { Locale } from '../data/types';
+import type { Translation } from '../i18n/bg';
+import { Content as BookingTermsBg } from '../../Условия за резервация и престой — Български.md';
+import { Content as BookingTermsEn } from '../../Booking & Stay Terms — English.md';
+import { Content as CookiesBg } from '../../Политика за бисквитки и локално съхранение — Български.md';
+import { Content as CookiesEn } from '../../Cookie & Local Storage Policy — English.md';
+import { Content as HouseRulesBg } from '../../Правила за престой — Български.md';
+import { Content as HouseRulesEn } from '../../House Rules — English.md';
+import { Content as PrivacyBg } from '../../Политика за поверителност — Български.md';
+import { Content as PrivacyEn } from '../../Privacy Policy — English.md';
+
+type PolicyKey = 'privacy' | 'cookies' | 'booking-terms' | 'house-rules';
+
+interface Props {
+  locale: Locale;
+  page: PolicyKey;
+  copy: Translation;
+}
+
+const { locale, page, copy } = Astro.props;
+const documentContents = {
+  privacy: { bg: PrivacyBg, en: PrivacyEn },
+  cookies: { bg: CookiesBg, en: CookiesEn },
+  'booking-terms': { bg: BookingTermsBg, en: BookingTermsEn },
+  'house-rules': { bg: HouseRulesBg, en: HouseRulesEn },
+};
+const PolicyContent = documentContents[page][locale];
+---
+
+<div class="standard-page policy-page">
+  <div class="container policy-layout">
+    <p class="eyebrow policy-eyebrow">{copy.footer.legalHeading}</p>
+    <aside class="policy-draft-note" role="note">
+      {copy.policies.draftNotice}
+    </aside>
+    <article class="policy-article">
+      <div class="policy-content">
+        <PolicyContent />
+      </div>
+    </article>
+  </div>
+</div>
+
+<style>
+  .policy-layout {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 920px;
+  }
+
+  .policy-eyebrow {
+    margin: 0;
+  }
+
+  .policy-draft-note {
+    padding: 0.8rem 1rem;
+    border-left: 2px solid var(--sea);
+    background: color-mix(in srgb, var(--paper-deep) 72%, white);
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .policy-article {
+    min-width: 0;
+    padding: clamp(1.25rem, 4vw, 3rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+  }
+
+  .policy-content :global(h1) {
+    margin: 0 0 1.25rem;
+    color: var(--forest);
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.15rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.12;
+  }
+
+  .policy-content :global(h2) {
+    margin: 2rem 0 0.75rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid var(--line);
+    color: var(--forest);
+    font-family: var(--font-heading);
+    font-size: clamp(1.15rem, 2.4vw, 1.4rem);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .policy-content :global(h1 + p) {
+    margin: 0 0 1.5rem;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .policy-content :global(p) {
+    max-width: 72ch;
+    margin: 0 0 0.9rem;
+    color: var(--ink);
+    font-size: 0.96rem;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+  }
+
+  .policy-content :global(ul),
+  .policy-content :global(ol) {
+    display: grid;
+    gap: 0.55rem;
+    margin: 0.65rem 0 1rem;
+    padding-left: 1.35rem;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  .policy-content :global(li) {
+    padding-left: 0.15rem;
+  }
+
+  .policy-content :global(strong) {
+    color: var(--forest);
+    font-weight: 650;
+  }
+
+  .policy-content :global(a) {
+    color: var(--forest);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    overflow-wrap: anywhere;
+  }
+
+  .policy-content :global(a:focus-visible) {
+    outline: 2px solid var(--sea);
+    outline-offset: 3px;
+  }
+
+  .policy-content :global(hr) {
+    height: 1px;
+    margin: 1.5rem 0;
+    border: 0;
+    background: var(--line);
+  }
+</style>

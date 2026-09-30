@@ -1,0 +1,91 @@
+---
+import type { Locale } from '../data/types';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const copy =
+  locale === 'bg'
+    ? {
+        heading: 'Доверие и информация',
+        licence: 'Лиценз / регистрационен номер на мястото за настаняване',
+        awards: 'Независими отличия от Orli',
+        tourism: 'Орли Туризъм 2025 · лауреат, златно отличие',
+        hotels: 'Орли Хотели 2026 · лауреат, златно отличие',
+      }
+    : {
+        heading: 'Trust & information',
+        licence: 'Accommodation licence / registration number',
+        awards: 'Third-party recognition from Orli',
+        tourism: 'Orli Tourism 2025 · laureate, gold recognition',
+        hotels: 'Orli Hotels 2026 · laureate, gold recognition',
+      };
+
+const bookingUrl =
+  'https://www.booking.com/hotel/bg/bungala-gnezdoto-bungalows-the-nest.bg.html';
+const tourismUrl = 'https://www.orliturizum.eu/city-3311-lozenec';
+const hotelsUrl = 'https://www.orlihoteli.eu/city-3311-lozenec';
+---
+
+<section class="trust-information" aria-labelledby="trust-information-heading">
+  <h2 id="trust-information-heading">{copy.heading}</h2>
+  <p class="trust-licence">
+    <span>{copy.licence}:</span>
+    <a href={bookingUrl} target="_blank" rel="noopener noreferrer">
+      Ц2-0ФА-Г33-С0
+    </a>
+  </p>
+  <div class="trust-awards">
+    <span class="trust-awards-label">{copy.awards}:</span>
+    <a href={tourismUrl} target="_blank" rel="noopener noreferrer">
+      {copy.tourism}
+    </a>
+    <a href={hotelsUrl} target="_blank" rel="noopener noreferrer">
+      {copy.hotels}
+    </a>
+  </div>
+</section>
+
+<style>
+  .trust-information {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin: 0 0 2rem;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .trust-information h2 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .trust-licence,
+  .trust-awards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.85rem;
+    margin: 0;
+  }
+
+  .trust-information a {
+    color: var(--forest);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+
+  .trust-information a:hover {
+    color: var(--forest-dark);
+  }
+</style>

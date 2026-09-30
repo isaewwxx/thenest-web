@@ -161,9 +161,12 @@ describe('SEO without a made-up domain', () => {
       en: 'https://example.org/en/gallery',
       indexable: true,
     });
-    expect(seoFor('home', 'bg', 'https://example.org', false).indexable).toBe(
-      false,
-    );
+    expect(seoFor('home', 'bg', 'https://example.org', false)).toEqual({
+      canonical: null,
+      bg: null,
+      en: null,
+      indexable: false,
+    });
   });
   it.each([
     'http://example.org',
@@ -208,11 +211,10 @@ describe('bilingual dictionary contract', () => {
       'ui.callAria',
       'reviews.label',
       'reviews.body',
-      'reviews.bookingSubtitle',
-      'reviews.airbnbSubtitle',
+      'reviews.bookingLink',
+      'reviews.airbnbLink',
       'booking.legendDates',
       'booking.legendContact',
-      'booking.guestOptions.g1',
       'booking.fields.namePlaceholder',
       'booking.sidebar.directContactTitle',
       'booking.sidebar.quietHoursValue',
@@ -225,7 +227,6 @@ describe('bilingual dictionary contract', () => {
       'booking.server.rateLimited',
       'booking.error.network',
       'location.places.smallBeachDistance',
-      'location.openInGoogleMaps',
       'accommodation.pagePhotoAlt',
       'home.brand',
       'footer.brandName',
@@ -248,7 +249,7 @@ describe('bilingual dictionary contract', () => {
   });
 
   it('keeps English copy independently idiomatic', () => {
-    expect(en.nav.booking).toBe('Book');
+    expect(en.nav.booking).toBe('Enquire');
     expect(en.booking.disclaimerText).toMatch(/enquiry/i);
     expect(en.booking.disclaimerText).not.toMatch(/запитване/);
     expect(en.accommodation.lead).toMatch(/kitchenette/i);

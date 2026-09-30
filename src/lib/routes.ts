@@ -6,6 +6,10 @@ export const pages = [
   'location',
   'booking',
   'contact',
+  'privacy',
+  'cookies',
+  'booking-terms',
+  'house-rules',
 ] as const;
 export type PageKey = (typeof pages)[number];
 export function pathFor(page: PageKey, locale: Locale): string {

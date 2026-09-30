@@ -5,9 +5,6 @@ import { pathFor } from '../lib/routes';
 import {
   Calendar,
   Users,
-  DoorOpen,
-  BedDouble,
-  Dog,
   User,
   Phone,
   Mail,
@@ -23,10 +20,9 @@ import {
 interface Props {
   locale: Locale;
   copy: Translation;
-  initialUnitId?: string;
 }
 
-const { locale, copy, initialUnitId = 'bungalow-room' } = Astro.props;
+const { locale, copy } = Astro.props;
 const b = copy.booking;
 const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 ---
@@ -215,142 +211,63 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
           </div>
         </div>
 
-        <div class="form-row selection-row">
-          <div class="form-field">
-            <label for="guests" class="field-label">
-              <Users
-                size={15}
-                stroke-width={2}
-                class="field-icon"
-                aria-hidden="true"
-              />
-              <span>{b.fields.guests}</span>{' '}
-              <span class="required" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <select
-              id="guests"
-              name="guests"
-              required
-              class="form-select"
-              aria-required="true"
-              aria-describedby="guests-help guests-error"
-            >
-              <option value="1">{b.guestOptions.g1}</option>
-              <option value="2" selected>
-                {b.guestOptions.g2}
-              </option>
-              <option value="3">{b.guestOptions.g3}</option>
-              <option value="4">{b.guestOptions.g4}</option>
-              <option value="5">{b.guestOptions.g5}</option>
-              <option value="6">{b.guestOptions.g6}</option>
-              <option value="7">{b.guestOptions.g7}</option>
-              <option value="8">{b.guestOptions.g8}</option>
-              <option value="9">{b.guestOptions.g9}</option>
-              <option value="12">{b.guestOptions.g12}</option>
-              <option value="18">{b.guestOptions.g18}</option>
-            </select>
-            <span class="field-help" id="guests-help">
-              {b.fields.guestsHelp}
+        <div class="form-field">
+          <label for="guests" class="field-label">
+            <Users
+              size={15}
+              stroke-width={2}
+              class="field-icon"
+              aria-hidden="true"
+            />
+            <span>{b.fields.guests}</span>{' '}
+            <span class="required" aria-hidden="true">
+              *
             </span>
-            <span
-              class="field-error"
-              id="guests-error"
-              role="alert"
-              style="display: none;"
-            ></span>
-          </div>
-
-          <div class="form-field">
-            <label for="rooms" class="field-label">
-              <DoorOpen
-                size={15}
-                stroke-width={2}
-                class="field-icon"
-                aria-hidden="true"
-              />
-              <span>{b.fields.rooms}</span>
-            </label>
-            <select
-              id="rooms"
-              name="rooms"
-              class="form-select"
-              aria-describedby="rooms-help rooms-error"
-            >
-              <option value="" selected>
-                {b.fields.roomsAny}
-              </option>
-              <option value="1">{b.fields.rooms1}</option>
-              <option value="2">{b.fields.rooms2}</option>
-              <option value="3">{b.fields.rooms3}</option>
-              <option value="4">{b.fields.rooms4}</option>
-              <option value="5">{b.fields.rooms5}</option>
-              <option value="6">{b.fields.rooms6}</option>
-            </select>
-            <span class="field-help" id="rooms-help">
-              {b.fields.roomsHelp}
-            </span>
-            <span
-              class="field-error"
-              id="rooms-error"
-              role="alert"
-              style="display: none;"
-            ></span>
-          </div>
+          </label>
+          <input
+            type="number"
+            id="guests"
+            name="guests"
+            min="1"
+            max="18"
+            step="1"
+            value="2"
+            inputmode="numeric"
+            required
+            class="form-select"
+            aria-required="true"
+            aria-describedby="guests-help guests-error"
+          />
+          <span class="field-help" id="guests-help">
+            {b.fields.guestsHelp}
+          </span>
+          <span
+            class="field-error"
+            id="guests-error"
+            role="alert"
+            style="display: none;"
+          ></span>
         </div>
 
-        <div class="form-row unit-pets-row">
-          <div class="form-field">
-            <label for="accommodationId" class="field-label">
-              <BedDouble
-                size={15}
-                stroke-width={2}
-                class="field-icon"
-                aria-hidden="true"
-              />
-              <span>{b.fields.accommodation}</span>
-            </label>
-            <select
-              id="accommodationId"
-              name="accommodationId"
-              class="form-select"
-              data-initial-unit={initialUnitId}
-            >
-              <option value="bungalow-room" selected={initialUnitId !== 'all'}>
-                {b.fields.roomOption}
-              </option>
-              <option value="all" selected={initialUnitId === 'all'}>
-                {b.fields.allRooms}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-field pets-field">
-            <label for="pets" class="field-label">
-              <Dog
-                size={15}
-                stroke-width={2}
-                class="field-icon"
-                aria-hidden="true"
-              />
-              <span>{b.fields.pets}</span>
-            </label>
-            <select
-              id="pets"
-              name="pets"
-              class="form-select"
-              aria-describedby="pets-note"
-            >
-              <option value="no" selected>
-                {b.fields.petsNo}
-              </option>
-              <option value="yes">{b.fields.petsYes}</option>
-            </select>
-            <span class="field-help" id="pets-note">
-              {b.fields.petsNote}
-            </span>
-          </div>
+        <div class="form-field">
+          <label for="accommodationPreference" class="field-label">
+            <span>{b.fields.accommodationPreference}</span>
+          </label>
+          <textarea
+            id="accommodationPreference"
+            name="accommodationPreference"
+            rows="2"
+            maxlength="300"
+            placeholder={b.fields.accommodationPreferencePlaceholder}
+            class="form-textarea"
+            aria-describedby="accommodationPreference-error"
+          ></textarea>
+          <span
+            class="field-error"
+            id="accommodationPreference-error"
+            role="alert"
+            style="display: none;"
+          ></span>
         </div>
       </fieldset>
     </div>
@@ -402,19 +319,15 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
               aria-hidden="true"
             />
             <span>{b.fields.phone}</span>{' '}
-            <span class="required" aria-hidden="true">
-              *
-            </span>
           </label>
           <input
             type="tel"
             id="phone"
             name="phone"
-            required
             autocomplete="tel"
             placeholder="+359 888 123 456"
             class="form-input"
-            aria-required="true"
+            aria-required="false"
             aria-describedby="phone-error"
           />
           <span
@@ -492,6 +405,33 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         ></span>
       </div>
     </fieldset>
+
+    <div class="privacy-consent-field">
+      <div class="privacy-consent-row">
+        <input
+          id="privacyAcknowledged"
+          name="privacyAcknowledged"
+          type="checkbox"
+          value="true"
+          required
+          class="privacy-consent-input"
+          aria-required="true"
+          aria-describedby="privacyAcknowledged-error"
+        />
+        <label for="privacyAcknowledged">
+          {b.fields.privacyAcknowledgement}
+        </label>
+      </div>
+      <a class="privacy-policy-link" href={pathFor('privacy', locale)}>
+        {b.fields.privacyLink}
+      </a>
+      <span
+        class="field-error"
+        id="privacyAcknowledged-error"
+        role="alert"
+        style="display: none;"
+      ></span>
+    </div>
 
     {turnstileSiteKey && (
       <div class="turnstile-wrapper">
@@ -716,27 +656,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         }
       }
 
-      const requestedUnit = urlParams.get('room') || urlParams.get('unit');
-      if (requestedUnit) {
-        const select = document.getElementById('accommodationId');
-        if (select) {
-          const match = Array.from(select.options).find(
-            (opt) => opt.value === requestedUnit,
-          );
-          if (match) {
-            select.value = requestedUnit;
-          }
-        }
-      }
-
-      const requestedRooms = urlParams.get('rooms');
-      if (requestedRooms) {
-        const selectRooms = document.getElementById('rooms');
-        if (selectRooms) {
-          selectRooms.value = requestedRooms;
-        }
-      }
-
       const requestedGuests = urlParams.get('guests');
       if (requestedGuests) {
         const selectGuests = document.getElementById('guests');
@@ -758,10 +677,12 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
       const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
       checkInInput.min = todayStr;
+      checkOutInput.min = todayStr;
 
       checkInInput.addEventListener('change', () => {
         if (checkInInput.value) {
-          const inDate = new Date(checkInInput.value);
+          const [year, month, day] = checkInInput.value.split('-').map(Number);
+          const inDate = new Date(year, month - 1, day);
           if (!isNaN(inDate.getTime())) {
             inDate.setDate(inDate.getDate() + 1);
             const nextDayStr = `${inDate.getFullYear()}-${pad(inDate.getMonth() + 1)}-${pad(inDate.getDate())}`;
@@ -773,6 +694,8 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
               checkOutInput.value = nextDayStr;
             }
           }
+        } else {
+          checkOutInput.min = todayStr;
         }
       });
     }
@@ -785,7 +708,9 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         el.style.display = 'none';
       });
       container
-        .querySelectorAll('.form-input, .form-select, .form-textarea')
+        .querySelectorAll(
+          '.form-input, .form-select, .form-textarea, .privacy-consent-input',
+        )
         .forEach((el) => {
           el.removeAttribute('aria-invalid');
           el.classList.remove('has-error');
@@ -807,8 +732,10 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
     }
 
     // 3. Form submission with Progressive Enhancement
+    let isSubmitting = false;
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (isSubmitting) return;
       clearErrors();
 
       // Client-side quick validation
@@ -824,10 +751,18 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
           showFieldError('checkIn', messages.checkInRequired);
           hasError = true;
           firstErrorField = firstErrorField || checkInInput;
+        } else if (checkInInput.value < checkInInput.min) {
+          showFieldError('checkIn', messages.checkInPast);
+          hasError = true;
+          firstErrorField = firstErrorField || checkInInput;
         }
 
         if (!checkOutInput.value) {
           showFieldError('checkOut', messages.checkOutRequired);
+          hasError = true;
+          firstErrorField = firstErrorField || checkOutInput;
+        } else if (checkOutInput.value < checkOutInput.min) {
+          showFieldError('checkOut', messages.checkOutPast);
           hasError = true;
           firstErrorField = firstErrorField || checkOutInput;
         } else if (
@@ -849,8 +784,12 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 
       const phoneInput = document.getElementById('phone');
       const phoneDigits = phoneInput.value.replace(/\D/g, '');
-      if (!phoneInput.value.trim() || phoneDigits.length < 7) {
-        showFieldError('phone', messages.phoneRequired);
+      if (
+        phoneInput.value.trim() &&
+        (phoneDigits.length < 7 ||
+          !/^[\d\s+().-]{7,25}$/.test(phoneInput.value.trim()))
+      ) {
+        showFieldError('phone', messages.phoneInvalid);
         hasError = true;
         firstErrorField = firstErrorField || phoneInput;
       }
@@ -864,6 +803,15 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         showFieldError('email', messages.emailRequired);
         hasError = true;
         firstErrorField = firstErrorField || emailInput;
+      }
+
+      const privacyAcknowledgedInput = document.getElementById(
+        'privacyAcknowledged',
+      );
+      if (!privacyAcknowledgedInput.checked) {
+        showFieldError('privacyAcknowledged', messages.privacyRequired);
+        hasError = true;
+        firstErrorField = firstErrorField || privacyAcknowledgedInput;
       }
 
       if (isQuestion) {
@@ -888,17 +836,8 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         delete data.checkIn;
         delete data.checkOut;
         delete data.guests;
-        delete data.rooms;
-        delete data.accommodationId;
-        delete data.pets;
       } else {
         data.guests = parseInt(data.guests, 10);
-        if (data.rooms) {
-          data.rooms = parseInt(data.rooms, 10);
-        } else {
-          delete data.rooms;
-        }
-        data.pets = data.pets === 'yes';
       }
 
       // Turnstile anti-spam token handling
@@ -914,7 +853,9 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
       }
 
       // Submit state
+      isSubmitting = true;
       submitBtn.disabled = true;
+      form.setAttribute('aria-busy', 'true');
       if (btnSpinner) btnSpinner.style.display = 'inline-flex';
       if (btnArrow) btnArrow.style.display = 'none';
       const originalText = btnText?.textContent;
@@ -972,6 +913,7 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
             } catch (_) {}
           }
           submitBtn.disabled = false;
+          isSubmitting = false;
         }
       } catch (err) {
         if (formErrorAlert) {
@@ -987,7 +929,9 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
           } catch (_) {}
         }
         submitBtn.disabled = false;
+        isSubmitting = false;
       } finally {
+        form.removeAttribute('aria-busy');
         if (btnSpinner) btnSpinner.style.display = 'none';
         if (btnArrow) btnArrow.style.display = 'inline-flex';
         if (btnText && originalText) btnText.textContent = originalText;
@@ -1249,6 +1193,57 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
     color: #c53030;
     margin-top: 0.4rem;
     font-weight: 550;
+  }
+
+  .privacy-consent-field {
+    display: grid;
+    gap: 0.35rem;
+    margin: 1.1rem 0 0.5rem;
+  }
+
+  .privacy-consent-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.7rem;
+    align-items: start;
+  }
+
+  .privacy-consent-input {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0.14rem 0 0;
+    accent-color: var(--forest);
+    cursor: pointer;
+  }
+
+  .privacy-consent-input:focus-visible {
+    outline: 2px solid var(--sea);
+    outline-offset: 3px;
+  }
+
+  .privacy-consent-input[aria-invalid='true'] {
+    outline: 2px solid #c53030;
+    outline-offset: 2px;
+  }
+
+  .privacy-consent-row label {
+    color: var(--ink);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    cursor: pointer;
+  }
+
+  .privacy-policy-link {
+    width: fit-content;
+    margin-left: 1.85rem;
+    color: var(--forest);
+    font-size: 0.84rem;
+    font-weight: 650;
+    text-underline-offset: 0.18em;
+  }
+
+  .privacy-consent-field > .field-error {
+    margin-left: 1.85rem;
   }
 
   .turnstile-wrapper {

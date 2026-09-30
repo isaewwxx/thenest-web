@@ -232,20 +232,20 @@ for (const locale of locales) {
     expect(motion.scroll).not.toBe('smooth');
   });
 
-  test(`${locale} displays guest feedback and platform trust metrics on homepage`, async ({
+  test(`${locale} links to current guest feedback without stale ratings`, async ({
     page,
   }) => {
     await page.goto(route(locale, ''));
     const reviewsSection = page.locator('.reviews-section');
     await expect(reviewsSection).toBeVisible();
-    await expect(reviewsSection.locator('.platform-badge')).toHaveCount(2);
-    await expect(
-      reviewsSection.getByText('10.0', { exact: true }),
-    ).toBeVisible();
-    await expect(
-      reviewsSection.getByText('5.0', { exact: true }),
-    ).toBeVisible();
-    await expect(reviewsSection.locator('.review-card')).toHaveCount(4);
+    await expect(reviewsSection.locator('.platform-link')).toHaveCount(2);
+    await expect(reviewsSection).not.toContainText(/10\.0|5\.0|4 500\+/);
+    await expect(reviewsSection.locator('a[href*="booking.com"]')).toHaveCount(
+      1,
+    );
+    await expect(reviewsSection.locator('a[href*="airbnb.com"]')).toHaveCount(
+      1,
+    );
   });
 
   test(`${locale} accommodation page displays structured amenities and check-in policies`, async ({

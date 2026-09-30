@@ -1,9 +1,11 @@
 import { corsHeaders, processBookingRequest } from '../../src/lib/booking';
 
-export const onRequestOptions = async (): Promise<Response> => {
+export const onRequestOptions = async (context: {
+  env: Record<string, string | undefined>;
+}): Promise<Response> => {
   return new Response(null, {
     status: 204,
-    headers: corsHeaders(),
+    headers: corsHeaders(undefined, context.env.PUBLIC_SITE_URL),
   });
 };
 

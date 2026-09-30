@@ -7,13 +7,14 @@ import PropertyGallery from '../components/PropertyGallery.astro';
 import AccommodationCards from '../components/AccommodationCards.astro';
 import ContactMethods from '../components/ContactMethods.astro';
 import ReviewsSection from '../components/ReviewsSection.astro';
+import LocationMap from '../components/LocationMap.astro';
 import PageShell from '../components/PageShell.astro';
+import PolicyDocument from '../components/PolicyDocument.astro';
 import BookingForm from '../components/BookingForm.astro';
 import { pages, pathFor, type PageKey } from '../lib/routes';
 import { t } from '../i18n';
 import { site } from '../data/site';
 import { accommodation } from '../data/accommodation';
-import { reviews } from '../data/reviews';
 import type { Locale } from '../data/types';
 import { heroPhoto } from '../data/gallery';
 import {
@@ -240,7 +241,7 @@ const essentials = [
         </section>
 
         <!-- 6. Guest Reviews & Platform Trust -->
-        <ReviewsSection locale={locale} copy={copy} reviews={reviews} />
+        <ReviewsSection copy={copy} />
 
         <!-- 7. Location Context -->
         <section class="location-preview container">
@@ -340,15 +341,7 @@ const essentials = [
               <p class="lead">{copy.booking.lead}</p>
             </div>
 
-            <BookingForm
-              locale={locale}
-              copy={copy}
-              initialUnitId={
-                Astro.url.searchParams.get('room') ||
-                Astro.url.searchParams.get('unit') ||
-                'bungalow-room'
-              }
-            />
+            <BookingForm locale={locale} copy={copy} />
           </div>
 
           <!-- Side Info Column -->
@@ -550,18 +543,6 @@ const essentials = [
                   </div>
                 </li>
               </ul>
-              {site.location.googleMapsUrl && (
-                <a
-                  class="neighborhood-maps-link"
-                  href={site.location.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <MapPin size={16} stroke-width={2} aria-hidden="true" />
-                  <span>{copy.location.openInGoogleMaps}</span>
-                  <ArrowUpRight size={16} stroke-width={2} aria-hidden="true" />
-                </a>
-              )}
             </div>
           </div>
           <div class="location-copy">
@@ -579,18 +560,11 @@ const essentials = [
               <p>{site.location.parking[locale]}</p>
               <h3>{copy.location.region}</h3>
               <p>{copy.location.regionBody}</p>
-              {site.location.googleMapsUrl && (
-                <a
-                  class="text-link"
-                  href={site.location.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span>{copy.ui.maps}</span>
-                  <ArrowUpRight size={16} stroke-width={2} aria-hidden="true" />
-                </a>
-              )}
             </div>
+            <LocationMap
+              locale={locale}
+              externalMapUrl={site.location.googleMapsUrl}
+            />
           </div>
         </div>
       </div>
@@ -646,6 +620,13 @@ const essentials = [
           </div>
         </div>
       </div>
+    )}
+
+    {(page === 'privacy' ||
+      page === 'cookies' ||
+      page === 'booking-terms' ||
+      page === 'house-rules') && (
+      <PolicyDocument locale={locale} page={page} copy={copy} />
     )}
   </PageShell>
 </BaseLayout>
@@ -1358,30 +1339,6 @@ const essentials = [
   .place-info span {
     color: var(--muted);
     font-size: 0.85rem;
-  }
-
-  .neighborhood-maps-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-    padding: 0.65rem 1rem;
-    background: color-mix(in srgb, var(--paper) 40%, white);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    color: var(--forest);
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: all var(--motion-fast) var(--ease-out);
-    width: fit-content;
-  }
-
-  .neighborhood-maps-link:hover {
-    background: var(--forest);
-    color: #ffffff;
-    border-color: var(--forest);
-    transform: translateY(-1px);
   }
 
   .location-details {

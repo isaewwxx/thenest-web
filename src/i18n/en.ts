@@ -6,7 +6,7 @@ export const en: Translation = {
     accommodation: 'Accommodation',
     gallery: 'Gallery',
     location: 'Location',
-    booking: 'Book',
+    booking: 'Enquire',
     contact: 'Contact',
   },
   header: {
@@ -47,6 +47,26 @@ export const en: Translation = {
       description:
         'Contact and accommodation enquiry information for The Nest in Lozenets, Bulgaria.',
     },
+    privacy: {
+      title: 'Privacy Policy | The Nest Bungalows',
+      description:
+        'Information about personal data processed for enquiries and stays at The Nest Bungalows.',
+    },
+    cookies: {
+      title: 'Cookies & local storage | The Nest Bungalows',
+      description:
+        'How cookies and necessary storage technologies are used on The Nest Bungalows website.',
+    },
+    'booking-terms': {
+      title: 'Booking & Stay Terms | The Nest Bungalows',
+      description:
+        'Terms for direct enquiries, bookings and stays at The Nest Bungalows in Lozenets.',
+    },
+    'house-rules': {
+      title: 'House Rules | The Nest Bungalows',
+      description:
+        'Rules for a comfortable stay at The Nest Bungalows and its shared spaces in Lozenets.',
+    },
     ogLocale: 'en_GB',
   },
   ui: {
@@ -61,10 +81,10 @@ export const en: Translation = {
     bookingCta: 'Request a stay',
     exploreRooms: 'Explore The Nest',
     callUs: 'Call us',
-    bookDirect: 'Book directly',
+    bookDirect: 'Enquire directly',
     preferPlatform: 'Prefer booking through a platform?',
-    bookOnBooking: 'Book on Booking.com',
-    bookOnAirbnb: 'Book on Airbnb',
+    bookOnBooking: 'View on Booking.com',
+    bookOnAirbnb: 'View on Airbnb',
     back: 'Back to home',
     next: 'Next image',
     previous: 'Previous image',
@@ -90,10 +110,14 @@ export const en: Translation = {
     callAria: 'Call +359 877 116 050',
   },
   reviews: {
-    label: 'REVIEWS',
-    body: 'Short excerpts from public guest reviews on Booking.com and Airbnb.',
-    bookingSubtitle: 'Rated “Exceptional” — cleanliness, facilities, location',
-    airbnbSubtitle: 'Top hospitality rating for host communication',
+    label: 'PUBLIC LISTINGS',
+    body: 'Read current guest feedback on our accommodation platforms.',
+    bookingLink: 'Guest reviews on Booking.com',
+    airbnbLink: 'Guest reviews on Airbnb',
+  },
+  policies: {
+    draftNotice:
+      'This document still contains operator and contact placeholders. Complete them before the website is made public.',
   },
   home: {
     brand: 'The Nest',
@@ -212,7 +236,6 @@ export const en: Translation = {
       parking: 'On-site private parking',
       parkingDesc: 'Included free for all guests',
     },
-    openInGoogleMaps: 'Open in Google Maps',
   },
   booking: {
     label: 'GET IN TOUCH',
@@ -232,43 +255,17 @@ export const en: Translation = {
     legendContact: '2. Your Contact Information',
     legendContactQuestion: '1. Your Contact Information',
     legendMessage: '2. Your message',
-    guestOptions: {
-      g1: '1 guest',
-      g2: '2 guests',
-      g3: '3 guests (1 room)',
-      g4: '4 guests (2 rooms)',
-      g5: '5 guests (2 rooms)',
-      g6: '6 guests (1 cabin / 2 rooms)',
-      g7: '7 guests (3 rooms)',
-      g8: '8 guests (3-4 rooms)',
-      g9: '9 guests (3 rooms / 9 beds)',
-      g12: '10–12 guests (4 rooms)',
-      g18: '13–18 guests (entire property / 3 cabins)',
-    },
     fields: {
-      checkIn: 'Check-in date',
-      checkOut: 'Check-out date',
+      checkIn: 'Preferred arrival date',
+      checkOut: 'Preferred departure date',
       guests: 'Number of guests',
-      guestsHelp: 'Up to 3 guests per room (18 guests total across 3 cabins)',
-      rooms: 'Number of rooms (optional)',
-      roomsHelp: 'The Nest offers 6 guest rooms in 3 wooden cabins',
-      roomsAny: 'Best fit based on guest count',
-      rooms1: '1 room (up to 3 guests)',
-      rooms2: '2 rooms (up to 6 guests / 1 entire cabin)',
-      rooms3: '3 rooms (up to 9 guests)',
-      rooms4: '4 rooms (up to 12 guests)',
-      rooms5: '5 rooms (up to 15 guests)',
-      rooms6: '6 rooms (up to 18 guests / entire property)',
-      accommodation: 'Accommodation choice',
-      allRooms: 'Any available room (or whole property enquiry)',
-      roomOption: 'Private room in a wooden bungalow (up to 3 guests)',
-      pets: 'Are you traveling with a pet?',
-      petsNo: 'No pets',
-      petsYes: 'Yes, traveling with a pet',
-      petsNote: 'Pets are welcome free of charge.',
+      guestsHelp: 'Enter the total number of guests (up to 18).',
+      accommodationPreference: 'Accommodation preference (optional)',
+      accommodationPreferencePlaceholder:
+        'If you have a specific preference, tell us here.',
       name: 'Full name',
       namePlaceholder: 'John Smith',
-      phone: 'Phone number',
+      phone: 'Phone number (optional)',
       email: 'Email address',
       message: 'Message or special requests (optional)',
       messageRequired: 'Your message',
@@ -276,6 +273,9 @@ export const en: Translation = {
         'E.g. estimated arrival time, questions about amenities...',
       messageQuestionPlaceholder:
         'Write your question — about dates, rates, the place, or anything else...',
+      privacyAcknowledgement:
+        'I have read and understood how my personal information will be handled.',
+      privacyLink: 'Privacy Policy',
       submit: 'Request a stay',
       submitQuestion: 'Send message',
       submitting: 'Sending enquiry...',
@@ -314,12 +314,17 @@ export const en: Translation = {
     },
     validation: {
       checkInRequired: 'Please select check-in date.',
+      checkInPast: 'Arrival date cannot be in the past.',
       checkOutRequired: 'Please select check-out date.',
+      checkOutPast: 'Departure date cannot be in the past.',
       checkOutAfter: 'Check-out must be after check-in.',
       nameRequired: 'Please provide your name.',
-      phoneRequired: 'Please provide a valid phone number.',
+      phoneInvalid:
+        'Please enter a valid phone number or leave this field blank.',
       emailRequired: 'Please provide a valid email address.',
       messageRequired: 'Please write a short message or question.',
+      privacyRequired:
+        'Please confirm that you have read the privacy information.',
     },
     otaTitle: 'Prefer booking through a platform?',
     otaDesc:
@@ -334,11 +339,16 @@ export const en: Translation = {
       nameTooLong: 'Name is too long (maximum 100 characters).',
       phoneInvalid: 'Please provide a valid contact telephone number.',
       emailInvalid: 'Please provide a valid email address.',
+      privacyRequired:
+        'Please confirm that you have read the privacy information.',
       messageRequired: 'Please write a short message or question.',
       messageTooLong: 'Message is too long (maximum 1000 characters).',
-      roomsRange: 'Please specify a room count between 1 and 6.',
+      preferenceTooLong: 'Preference is too long (maximum 300 characters).',
       duplicate: 'Your enquiry was already received. We will contact you.',
-      sentDev: 'Enquiry sent successfully (dev mode).',
+      pending:
+        'Your enquiry is still being sent. Please wait a moment and try again.',
+      configuration:
+        'The form cannot send enquiries right now. Please try again later or call us.',
       sendFailed:
         'Could not send enquiry. Please try again later or call +359 877 116 050.',
       sent: 'Your enquiry was sent.',
@@ -376,7 +386,11 @@ export const en: Translation = {
     line: 'A little place for your summer.',
     region: 'Lozenets, Bulgaria',
     copyright: 'All rights reserved.',
-    privacy: 'Privacy',
+    privacy: 'Privacy Policy',
+    cookies: 'Cookies & storage',
+    bookingTerms: 'Booking terms',
+    houseRules: 'House rules',
+    legalHeading: 'Policies & terms',
     brandSubtitle: 'Bungalows in Lozenets',
     brandName: 'The Nest Bungalows',
     navHeading: 'Navigation',

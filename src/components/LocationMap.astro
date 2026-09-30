@@ -1,0 +1,104 @@
+---
+import type { Locale } from '../data/types';
+
+interface Props {
+  locale: Locale;
+  externalMapUrl: string | null;
+}
+
+const { locale, externalMapUrl } = Astro.props;
+const copy =
+  locale === 'bg'
+    ? {
+        title: 'Карта с местоположението на Бунгала Гнездото',
+        disclosure: 'Зареждането на картата свързва браузъра ви с Google Maps.',
+        open: 'Отвори в Google Maps',
+      }
+    : {
+        title: 'Map showing the location of The Nest Bungalows',
+        disclosure: 'Loading the map connects your browser to Google Maps.',
+        open: 'Open in Google Maps',
+      };
+
+const embedUrl =
+  'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d47297.94793607472!2d27.82833753897559!3d42.19046432100702!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40a12d0042cdea91%3A0xdb38ee5bb53e0b1c!2z0JHRg9C90LPQsNC70LAg0JPQvdC10LfQtNC-0YLQviAtINCb0L7Qt9C10L3QtdGG!5e0!3m2!1sen!2sbg!4v1790791380524!5m2!1sen!2sbg';
+---
+
+<section class="location-map" data-google-map>
+  <p class="map-disclosure">{copy.disclosure}</p>
+  <div class="map-frame">
+    <iframe
+      src={embedUrl}
+      title={copy.title}
+      loading="lazy"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+      allow="fullscreen"
+    ></iframe>
+  </div>
+  {externalMapUrl && (
+    <a
+      class="map-external-link"
+      href={externalMapUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {copy.open}
+      <span aria-hidden="true">↗</span>
+    </a>
+  )}
+</section>
+
+<style>
+  .location-map {
+    min-width: 0;
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+
+  .map-disclosure {
+    margin: 0 0 0.85rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+  .map-external-link:focus-visible {
+    outline: 2px solid var(--sea);
+    outline-offset: 3px;
+  }
+
+  .map-frame {
+    width: 100%;
+    max-height: 480px;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border-radius: var(--radius, 8px);
+    background: var(--paper-deep);
+  }
+
+  .map-frame iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: inherit;
+  }
+
+  .map-external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+    color: var(--forest);
+    font-size: 0.88rem;
+    font-weight: 650;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+  }
+
+  @media (max-width: 700px) {
+    .map-frame {
+      aspect-ratio: 4 / 3;
+      max-height: 430px;
+    }
+  }
+</style>

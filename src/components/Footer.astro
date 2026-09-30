@@ -5,6 +5,7 @@ import type { Translation } from '../i18n/bg';
 import { site } from '../data/site';
 import { MapPin, Phone, ArrowUpRight } from '@lucide/astro';
 import NestMark from './NestMark.astro';
+import TrustInformation from './TrustInformation.astro';
 
 interface Props {
   locale: Locale;
@@ -103,6 +104,10 @@ const brandName = copy.home.brand;
     </div>
   </div>
 
+  <div class="container">
+    <TrustInformation locale={locale} />
+  </div>
+
   <div class="container footer-bottom">
     <div class="footer-copy-text">
       <p>
@@ -111,6 +116,12 @@ const brandName = copy.home.brand;
       </p>
       <p class="muted">{copy.footer.copyright}</p>
     </div>
+    <nav class="footer-legal-links" aria-label={copy.footer.legalHeading}>
+      <a href={pathFor('privacy', locale)}>{copy.footer.privacy}</a>
+      <a href={pathFor('cookies', locale)}>{copy.footer.cookies}</a>
+      <a href={pathFor('booking-terms', locale)}>{copy.footer.bookingTerms}</a>
+      <a href={pathFor('house-rules', locale)}>{copy.footer.houseRules}</a>
+    </nav>
     <div class="footer-alt-links">
       <a href={pathFor(page, other)} lang={other} class="footer-lang-switch">
         {copy.footer.langSwitchLabel}
@@ -266,6 +277,23 @@ const brandName = copy.home.brand;
     color: var(--forest);
     text-decoration: none;
     font-weight: 600;
+  }
+
+  .footer-legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.9rem;
+    align-items: center;
+  }
+
+  .footer-legal-links a {
+    color: var(--muted);
+    font-size: 0.82rem;
+    text-underline-offset: 0.18em;
+  }
+
+  .footer-legal-links a:hover {
+    color: var(--forest);
   }
 
   .footer-lang-switch:hover {

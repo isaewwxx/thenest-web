@@ -8,5 +8,8 @@
     "test-results",
     "playwright-report"
   ],
-  "compilerOptions": { "noUncheckedIndexedAccess": true }
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
+    "allowImportingTsExtensions": true
+  }
 }

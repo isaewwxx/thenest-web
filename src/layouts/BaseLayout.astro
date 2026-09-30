@@ -3,7 +3,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileBottomBar from '../components/MobileBottomBar.astro';
 import { t } from '../i18n';
-import { pathFor, type PageKey } from '../lib/routes';
+import type { PageKey } from '../lib/routes';
 import { seoFor, siteOrigin } from '../lib/content';
 import type { Locale } from '../data/types';
 import '../styles/global.css';
@@ -25,7 +25,6 @@ const seo = seoFor(
   origin,
   import.meta.env.PUBLIC_INDEXABLE === 'true',
 );
-const other = locale === 'bg' ? 'en' : 'bg';
 ---
 
 <!doctype html>
@@ -55,12 +54,9 @@ const other = locale === 'bg' ? 'en' : 'bg';
     />
     <meta property="og:locale" content={copy.meta.ogLocale} />
     <meta property="og:site_name" content={copy.footer.brandName} />
-    {origin && <meta property="og:url" content={seo.canonical!} />}
-    <link
-      rel="alternate"
-      hreflang={other}
-      href={origin ? `${origin}${pathFor(page, other)}` : pathFor(page, other)}
-    />
+    {seo.indexable && seo.canonical && (
+      <meta property="og:url" content={seo.canonical} />
+    )}
   </head>
   <body>
     <Header locale={locale} page={page} copy={copy} />
