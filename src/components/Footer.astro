@@ -119,7 +119,9 @@ const brandName = copy.home.brand;
     <nav class="footer-legal-links" aria-label={copy.footer.legalHeading}>
       <a href={pathFor('privacy', locale)}>{copy.footer.privacy}</a>
       <a href={pathFor('cookies', locale)}>{copy.footer.cookies}</a>
-      <button type="button" data-cookie-preferences>{copy.footer.cookieSettings}</button>
+      <button type="button" data-cookie-preferences>
+        {copy.footer.cookieSettings}
+      </button>
       <a href={pathFor('booking-terms', locale)}>{copy.footer.bookingTerms}</a>
       <a href={pathFor('house-rules', locale)}>{copy.footer.houseRules}</a>
     </nav>
@@ -290,6 +292,7 @@ const brandName = copy.home.brand;
   .footer-legal-links a {
     color: var(--muted);
     font-size: 0.82rem;
+    text-decoration: none;
     text-underline-offset: 0.18em;
   }
 

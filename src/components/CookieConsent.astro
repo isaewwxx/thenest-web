@@ -11,7 +11,6 @@ interface Props {
 const { locale, copy } = Astro.props;
 const consent = copy.cookieConsent;
 ---
----
 
 <aside
   class="cookie-consent"
@@ -79,14 +78,17 @@ const consent = copy.cookieConsent;
 
     let mapObserver = null;
     if ('IntersectionObserver' in window) {
-      mapObserver = new IntersectionObserver((entries) => {
+      mapObserver = new IntersectionObserver(
+        (entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
             mapObserver.unobserve(entry.target);
             entry.target.dataset.mapObserving = 'false';
             loadMap(entry.target);
           });
-        }, { rootMargin: '240px 0px' });
+        },
+        { rootMargin: '240px 0px' },
+      );
     }
 
     const updateMaps = () => {
@@ -207,6 +209,7 @@ const consent = copy.cookieConsent;
   .cookie-consent-copy a {
     color: var(--forest);
     font-size: 0.84rem;
+    text-decoration: none;
     text-underline-offset: 0.15em;
   }
 

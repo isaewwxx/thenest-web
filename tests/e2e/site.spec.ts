@@ -15,6 +15,20 @@ const route = (locale: (typeof locales)[number], path: string) =>
   `${locale === 'en' ? '/en' : ''}${path}` || '/';
 const normalizedPath = (path: string) => path.replace(/\/$/, '') || '/';
 
+test('footer cookie policy link has no underline or stray dash text', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await expect(
+    page.locator('[data-cookie-banner] a[href="/cookies"]'),
+  ).toHaveCSS('text-decoration-line', 'none');
+  await expect(
+    page.locator('footer .footer-legal-links a[href="/cookies"]'),
+  ).toHaveCSS('text-decoration-line', 'none');
+  await expect(page.locator('body')).not.toContainText('---');
+});
+
 async function expectNoOverflow(page: Page) {
   const size = await page.evaluate(() => ({
     content: document.documentElement.scrollWidth,

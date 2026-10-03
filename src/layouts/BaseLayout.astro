@@ -3,10 +3,13 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MobileBottomBar from '../components/MobileBottomBar.astro';
 import CookieConsent from '../components/CookieConsent.astro';
+import { getImage } from 'astro:assets';
 import { t } from '../i18n';
 import type { PageKey } from '../lib/routes';
 import { seoFor, siteOrigin } from '../lib/content';
+import { lodgingBusinessJsonLd } from '../lib/structured-data';
 import type { Locale } from '../data/types';
+import { heroPhoto } from '../data/gallery';
 import '../styles/global.css';
 
 interface Props {
@@ -14,9 +17,16 @@ interface Props {
   page?: PageKey;
   title?: string;
   description?: string;
+  noIndex?: boolean;
 }
 
-const { locale = 'bg', page = 'home', title, description } = Astro.props;
+const {
+  locale = 'bg',
+  page = 'home',
+  title,
+  description,
+  noIndex = false,
+} = Astro.props;
 
 const copy = t(locale);
 const origin = siteOrigin(import.meta.env.PUBLIC_SITE_URL);
@@ -24,8 +34,25 @@ const seo = seoFor(
   page,
   locale,
   origin,
-  import.meta.env.PUBLIC_INDEXABLE === 'true',
+  import.meta.env.PUBLIC_INDEXABLE === 'true' && !noIndex,
 );
+const shareImage = seo.indexable
+  ? await getImage({
+      src: heroPhoto.src,
+      width: 1200,
+      height: 630,
+      fit: 'cover',
+      format: 'jpeg',
+    })
+  : null;
+const shareImageUrl =
+  shareImage && origin ? new URL(shareImage.src, origin).href : null;
+const lodgingJsonLd =
+  seo.indexable && page === 'home' && origin && shareImageUrl
+    ? JSON.stringify(
+        lodgingBusinessJsonLd(origin, locale, shareImageUrl),
+      ).replace(/</g, '\\u003c')
+    : null;
 ---
 
 <!doctype html>
@@ -57,6 +84,29 @@ const seo = seoFor(
     <meta property="og:site_name" content={copy.footer.brandName} />
     {seo.indexable && seo.canonical && (
       <meta property="og:url" content={seo.canonical} />
+    )}
+    {shareImageUrl && (
+      <>
+        <meta property="og:image" content={shareImageUrl} />
+        <meta property="og:image:alt" content={heroPhoto.alt[locale]} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title ?? copy.meta[page].title} />
+        <meta
+          name="twitter:description"
+          content={description ?? copy.meta[page].description}
+        />
+        <meta name="twitter:image" content={shareImageUrl} />
+      </>
+    )}
+    {lodgingJsonLd && (
+      <script
+        is:inline
+        type="application/ld+json"
+        set:html={lodgingJsonLd}
+      ></script>
     )}
   </head>
   <body>

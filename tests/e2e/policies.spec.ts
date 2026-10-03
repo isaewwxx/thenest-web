@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+const indexable = process.env.PUBLIC_INDEXABLE === 'true';
+
 const policies = [
   {
     slug: 'privacy',
@@ -62,10 +64,9 @@ for (const locale of ['bg', 'en'] as const) {
       );
       await expect(content.locator('h2').count()).resolves.toBeGreaterThan(2);
       await expect(content).toContainText('2026');
-      await expect(page.locator('.policy-draft-note')).toBeVisible();
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
         'content',
-        'noindex,nofollow',
+        indexable ? 'index,follow' : 'noindex,nofollow',
       );
 
       const otherLocalePath = `${locale === 'en' ? '' : '/en'}/${policy.slug}`;

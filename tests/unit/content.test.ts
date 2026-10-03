@@ -146,6 +146,15 @@ describe('partial and approved business data', () => {
 });
 
 describe('SEO without a made-up domain', () => {
+  it('uses distinct property and location search snippets in both languages', () => {
+    expect(bg.meta.accommodation.title).toContain('Бунгала');
+    expect(bg.meta.accommodation.description).toContain('веранда');
+    expect(bg.meta.location.title).toContain('Малкия плаж');
+    expect(en.meta.accommodation.title).toContain('Bungalows');
+    expect(en.meta.accommodation.description).toContain('kitchenette');
+    expect(en.meta.location.title).toContain('Small Beach');
+  });
+
   it('omits canonical URLs and disallows indexing when origin is absent', () => {
     expect(siteOrigin('')).toBe(null);
     expect(seoFor('gallery', 'en', null, false)).toMatchObject({

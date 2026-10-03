@@ -23,9 +23,9 @@ export const en: Translation = {
         'Small bungalows surrounded by greenery in Lozenets, on Bulgaria’s southern Black Sea coast. Discover the atmosphere and accommodation at The Nest.',
     },
     accommodation: {
-      title: 'Accommodation | The Nest, Lozenets',
+      title: 'Bungalows for a Lozenets Stay | The Nest',
       description:
-        'Discover small bungalow accommodation among greenery at The Nest in Lozenets, Bulgaria, near the Black Sea.',
+        'Stay in a wooden bungalow room with a private veranda, bathroom and kitchenette, set in a garden in Lozenets, Bulgaria.',
     },
     gallery: {
       title: 'Gallery | The Nest, Lozenets',
@@ -33,9 +33,9 @@ export const en: Translation = {
         'A visual introduction to the bungalows, greenery and outdoor spaces at The Nest in Lozenets.',
     },
     location: {
-      title: 'Location | The Nest, Lozenets, Bulgaria',
+      title: 'Bungalows Near Small Beach, Lozenets | The Nest',
       description:
-        'Find out about Lozenets, near Tsarevo on Bulgaria’s southern Black Sea coast, home to The Nest bungalow accommodation.',
+        'The Nest Bungalows are about a 200 m walk from Small Beach and the fishing port in Lozenets. View the map, nearby area and directions.',
     },
     booking: {
       title: 'Request a stay | The Nest Bungalows, Lozenets',
